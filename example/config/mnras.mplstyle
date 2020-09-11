@@ -1,0 +1,38 @@
+# Line Properties
+lines.linewidth: 1.5
+
+# Font options
+font.size: 8
+font.family: STIXGeneral
+mathtext.fontset: stix
+
+# Automatically make the plots look nice
+figure.constrained_layout.use: True
+figure.constrained_layout.h_pad: 0.005
+figure.constrained_layout.w_pad: 0.005
+figure.constrained_layout.hspace: 0.005
+figure.constrained_layout.wspace: 0.005
+
+# LaTeX options
+text.usetex: False
+
+# Legend options
+legend.frameon: False
+legend.fontsize: 6
+
+# Figure options for publications
+figure.dpi: 300
+figure.figsize: 3.321, 3.0 # Correct width for MNRAS
+
+# Histogram options
+hist.bins: auto
+
+# Ticks inside plots; more space devoted to plot.
+xtick.direction: in
+ytick.direction: in
+
+# Setup Durham Colours
+axes.prop_cycle: cycler('color', ['55E18E', '00AEFF','FF8C40', 'A646FF', 'CC4314', '5766B3', '68246D'])
+
+# Use a non-clashing default colour map
+image.cmap: cividis
