@@ -23,5 +23,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[],
-    scripts=[],
+    scripts=["swift-pipeline"],
 )
