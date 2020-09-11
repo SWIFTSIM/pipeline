@@ -1,0 +1,23 @@
+# Example configuration file for a COLIBRE-like simulation
+
+# Location of your other .yml files that are passed to the
+# velociraptor auto plotter (these describe your scaling)
+# relation figures. Also required is the registration file
+# in the case where you have non-catalogue properties
+# used in the autoplotter.
+auto_plotter_directory: auto_plotter
+auto_plotter_registration: registration.py
+
+# Location of the 'observational data' repository and its compiled
+# contents.
+observational_data_directory: observational_data
+
+# Style sheet to be used throughout with plotting
+matplotlib_stylesheet: mnras.mplstyle
+
+# Location and description of additional figures
+scripts:
+  - filename: scripts/density_temperature.py
+    caption: Hello World
+    output_file: density_temperature.png
+    section: Density-Temperature
