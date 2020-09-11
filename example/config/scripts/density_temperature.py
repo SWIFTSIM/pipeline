@@ -52,32 +52,67 @@ def make_hist(filename, density_bounds, temperature_bounds, bins):
     return H.T, density_edges, temperature_edges
 
 
-def setup_axes():
+def setup_axes(number_of_simulations: int):
     """
-    Creates the figure and axis object.
+    Creates the figure and axis object. Creates a grid of a x b subplots
+    that add up to at least number_of_simulations.
     """
-    fig, ax = plt.subplots(1)
 
-    ax.set_xlabel("Density [$n_H$ cm$^{-3}$]")
-    ax.set_ylabel("Temperature [K]")
+    sqrt_number_of_simulations = np.sqrt(number_of_simulations)
+    horizontal_number = int(np.ceil(sqrt_number_of_simulations))
+    # Ensure >= number_of_simulations plots in a grid
+    vertical_number = int(np.ceil(number_of_simulations / horizontal_number))
 
-    ax.loglog()
+    fig, ax = plt.subplots(
+        vertical_number, horizontal_number, squeeze=True, sharex=True, sharey=True,
+    )
+
+    ax = np.array([ax]) if number_of_simulations == 1 else ax
+
+    if horizontal_number * vertical_number > number_of_simulations:
+        for axis in ax.flat[number_of_simulations:]:
+            axis.axis("off")
+
+    # Set all valid on bottom row to have the horizontal axis label.
+    for axis in np.atleast_2d(ax)[:][-1]:
+        axis.set_xlabel("Density [$n_H$ cm$^{-3}$]")
+
+    for axis in np.atleast_2d(ax).T[:][0]:
+        axis.set_ylabel("Temperature [K]")
+
+    ax.flat[0].loglog()
 
     return fig, ax
 
 
-def make_single_image(filename, density_bounds, temperature_bounds, bins, output_path):
+def make_single_image(
+    filenames,
+    names,
+    number_of_simulations,
+    density_bounds,
+    temperature_bounds,
+    bins,
+    output_path,
+):
     """
     Makes a single plot of rho-T
     """
 
-    fig, ax = setup_axes()
-    hist, d, T = make_hist(filename, density_bounds, temperature_bounds, bins)
+    fig, ax = setup_axes(number_of_simulations=number_of_simulations)
 
-    mappable = ax.pcolormesh(d, T, hist, norm=LogNorm(vmin=1))
-    fig.colorbar(mappable, label="Number of particles", pad=0)
+    hists = []
 
-    fig.tight_layout()
+    for filename in filenames:
+        hist, d, T = make_hist(filename, density_bounds, temperature_bounds, bins)
+        hists.append(hist)
+
+    vmax = np.max([np.max(hist) for hist in hists])
+
+    for hist, name, axis in zip(hists, names, ax.flat):
+        mappable = axis.pcolormesh(d, T, hist, norm=LogNorm(vmin=1, vmax=vmax))
+        axis.text(0.025, 0.975, name, ha="left", va="top", transform=axis.transAxes)
+
+    fig.colorbar(mappable, ax=ax.ravel().tolist(), label="Number of particles")
 
     fig.savefig(f"{output_path}/density_temperature.png")
 
@@ -85,40 +120,26 @@ def make_single_image(filename, density_bounds, temperature_bounds, bins, output
 
 
 if __name__ == "__main__":
-    import argparse as ap
+    from swiftpipeline.argumentparser import ScriptArgumentParser
 
-    parser = ap.ArgumentParser(description="Basic density-temperature plot.")
+    arguments = ScriptArgumentParser(description="Basic density-temperature figure.")
 
-    parser.add_argument(
-        "-s", "--snapshots", type=str, required=True, nargs="*",
-    )
-    parser.add_argument(
-        "-c", "--catalogues", type=str, required=True, nargs="*",
-    )
-    parser.add_argument(
-        "-d", "--input-directories", type=str, required=True, nargs="*",
-    )
-    parser.add_argument("-n", "--run-names", type=str, required=False, nargs="*")
-    parser.add_argument("-o", "--output-directory", type=str, required=True)
-    parser.add_argument("-C", "--config", type=str, required=True)
+    snapshot_filenames = [
+        f"{directory}/{snapshot}"
+        for directory, snapshot in zip(
+            arguments.directory_list, arguments.snapshot_list
+        )
+    ]
 
-    args = parser.parse_args()
-
-    snapshot_names = args.snapshots
-    catalogue_names = args.catalogue_names
-    run_directories = args.input_directories
-    run_names = (
-        args.run_names if args.run_names is not None else [None] * len(run_directories)
-    )
-    output_paths = args.output_directory
-    config = args.config
-    run_directory = None
-    snapshot_name = None
-    output_path = None
-
-    snapshot_filename = f"{run_directory}/{snapshot_name}"
+    plt.style.use(arguments.stylesheet_location)
 
     make_single_image(
-        snapshot_filename, density_bounds, temperature_bounds, bins, output_path
+        filenames=snapshot_filenames,
+        names=arguments.name_list,
+        number_of_simulations=arguments.number_of_inputs,
+        density_bounds=density_bounds,
+        temperature_bounds=temperature_bounds,
+        bins=bins,
+        output_path=arguments.output_directory,
     )
 

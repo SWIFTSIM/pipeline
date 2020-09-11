@@ -7,7 +7,7 @@ from typing import List, Union, Tuple, Optional
 from swiftpipeline.config import Config
 
 
-def ScriptArgumentParser(object):
+class ScriptArgumentParser(object):
     """
     Script argument parser for ``swiftpipeline`` additional scripts.
     
@@ -130,13 +130,17 @@ def ScriptArgumentParser(object):
         self.catalogue_list = args.catalogues
         self.directory_list = args.input_directories
         self.name_list = (
-            args.name_list
-            if args.name_list is not None
+            args.run_names
+            if args.run_names is not None
             else [None] * self.number_of_inputs
         )
         self.output_directory = args.output_directory
-        self.config_directory = args.config_directory
+        self.config_directory = args.config
 
         self.config = Config(config_directory=self.config_directory)
 
         return
+
+    @property
+    def stylesheet_location(self):
+        return f"{self.config_directory}/{self.config.matplotlib_stylesheet}"
