@@ -55,7 +55,7 @@ New Script API
 Additional plotting scripts, such as the one used for the density-temperature
 figure, now should conform to the following API and be runnable as:
 
-```
+```bash
 python3 my_script.py \
   -s snapshot_0000.hdf5 snapshot_0001.hdf5 ... \ # These may be from different sims
   -c halo_0000.hdf5 halo_0001.hdf5 ... \  # Again different sims
@@ -68,3 +68,42 @@ python3 my_script.py \
 For an example of how to implement this, please see the example in
 `example/config/scripts`.
 
+
+New Pipeline API
+----------------
+
+The pipeline now can be run in two modes:
+
+1. Produce all plots and, importantly, the output line data for, a single snapshot,
+   with the output line data now being stored in the input directory (i.e. next to
+   the snapshot).
+2. Produce all plots comparing multiple simulations (_including_ the new scripts
+   through the API defined above) using the output line data.
+
+Both of these produce webpages automatically that include all of the required data.
+
+To run the pipeline, you now need to use a configuration file and directory.
+As noted above, one of these is provided in `example`. This is passed to the pipeline,
+which now acts as an executable, in the following way:
+
+```bash
+swift-pipeline -C ~/config \ # Your configuration directory (customised for sim suite)
+  -c example_0000.properties \ # Name of your catalogue file
+  -s snapshot_0000.hdf5 \ # Name of your snapshot file
+  -i /path/to/your/snapshot \ # Path to snap directory containing properties as well
+  -o ~/plots/output \ # Output directory to store HTML, etc. in.
+```
+
+This will then create `/path/to/your/snapshot/data_0000.yml`. Once you have performed
+this for several simulations, you can create a comparison webpage for them using:
+
+```bash
+swift-pipeline -C ~/config \ # Your configuration directory (customised for sim suite)
+  -c example_0000.properties example_0000.properties \ # Name of your catalogue files
+  -s snapshot_0000.hdf5 snapshot_0000.hdf5 \ # Name of your snapshot files
+  -i /path/to/your/A/snapshot /path/to/your/B/snapshot \ # Path to both directories
+  -o ~/plots/output \ # Output directory to store HTML, etc. in.
+```
+
+This elevates the comparisons  to being 'first class' citizens - they are treated
+in the same way as the creation of the 'real' data.
