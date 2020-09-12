@@ -107,3 +107,15 @@ swift-pipeline -C ~/config \ # Your configuration directory (customised for sim 
 
 This elevates the comparisons  to being 'first class' citizens - they are treated
 in the same way as the creation of the 'real' data.
+
+
+Installation
+------------
+
+To install the pipeline, you can use the python packaging manager, `pip`,
+
+```bash
+pip3 install swiftpipeline
+```
+
+This will make the `swift-pipeline` executable available.
