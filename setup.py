@@ -8,7 +8,7 @@ setuptools.setup(
     name="swiftpipeline",
     version=__version__,
     description="Pipeline for producing galaxy scaling relation plots.",
-    url="https://joshborrow.com",
+    url="https://github.com/SWIFTSIM/pipeline",
     author="Josh Borrow",
     author_email="josh@joshborrow.com",
     packages=setuptools.find_packages(),
