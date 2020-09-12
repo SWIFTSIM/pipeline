@@ -28,18 +28,20 @@ parser.add_argument(
 
 parser.add_argument(
     "-c",
-    "--catalogue",
+    "--catalogues",
     type=str,
     required=True,
-    help="Name of the VELOCIraptor HDF5 .properties file. Required.",
+    help="Name of the VELOCIraptor HDF5 .properties file(s). Required.",
+    nargs="*",
 )
 
 parser.add_argument(
     "-s",
-    "--snapshot",
+    "--snapshots",
     required=True,
     type=str,
-    help="Name of the snapshot file. Required.",
+    help="Name of the snapshot file(s). Required.",
+    nargs="*",
 )
 
 parser.add_argument(
@@ -57,9 +59,13 @@ parser.add_argument(
     required=False,
     default=".",
     help=(
-        "Input directory where the snapshot and properties file are located. "
-        "Default is the current working directory."
+        "Input directory where the snapshot(s) and properties file(s) are located. "
+        "Default is the current working directory. If you are running for comparison "
+        "purposes you will need to ensure that the metadata yaml files have been "
+        "generated in these folders and have the same basename (--metadata) as is "
+        "given here."
     ),
+    nargs="*",
 )
 
 parser.add_argument(
@@ -83,10 +89,15 @@ parser.add_argument(
     ),
 )
 
+
 if __name__ == "__main__":
     # Parse our lovely arguments and pass them to the velociraptor library
     from velociraptor.autoplotter.objects import AutoPlotter
     from velociraptor.autoplotter.metadata import AutoPlotterMetadata
+    from velociraptor.autoplotter.compare import (
+        recreate_instances,
+        recreate_single_figure,
+    )
     from velociraptor import load
 
     from swiftsimio import load as load_snapshot
@@ -96,13 +107,14 @@ if __name__ == "__main__":
 
     from subprocess import run
     from glob import glob
+    import os
 
     from swiftpipeline.config import Config
     from swiftpipeline.html import WebpageCreator
 
-    args = parser.parse_args()
-
     PLOT_FILE_EXTENSION = "png"
+
+    args = parser.parse_args()
 
     # Set up some basic debugging things
     if args.debug:
@@ -124,55 +136,98 @@ if __name__ == "__main__":
         print_if_debug(f"Applying matplotlib stylesheet at {stylesheet_path}.")
         style.use(stylesheet_path)
 
-    print_if_debug(
-        f"Generating initial AutoPlotter instance for {config.auto_plotter_directory}."
+    auto_plotter_configs = glob(
+        f"{config.config_directory}/{config.auto_plotter_directory}/*.yml"
     )
 
-    auto_plotter = AutoPlotter(
-        glob(f"{config.config_directory}/{config.auto_plotter_directory}/*.yml"),
-        observational_data_directory=config.observational_data_directory,
-    )
+    print_if_debug("Loading snapshot metadata")
+    snapshots = [
+        load_snapshot(f"{input}/{snapshot}")
+        for input, snapshot in zip(args.input, args.snapshots)
+    ]
+    run_names = [data.metadata.run_name for data in snapshots]
 
-    halo_catalogue_filename = f"{args.input}/{args.catalogue}"
-    print_if_debug(f"Loading halo catalogue at {halo_catalogue_filename}.")
-
-    registration_filename = (
-        None
-        if config.auto_plotter_registration is None
-        else f"{config.config_directory}/{config.auto_plotter_registration}"
-    )
-
-    if registration_filename is not None:
+    if len(args.snapshots) == 1:
+        # Run the pipeline based on the arguments if only a single simulation is
+        # included and generate the metadata yaml file.
         print_if_debug(
-            f"Using registration functions contained in {registration_filename}"
+            f"Generating initial AutoPlotter instance for {config.auto_plotter_directory}."
         )
 
-    catalogue = load(
-        halo_catalogue_filename, registration_file_path=registration_filename,
-    )
-    print_if_debug(f"Linking catalogue and AutoPlotter instance.")
-    auto_plotter.link_catalogue(catalogue=catalogue)
+        auto_plotter = AutoPlotter(
+            auto_plotter_configs,
+            observational_data_directory=config.observational_data_directory,
+        )
 
-    print_if_debug(f"Creating figures with extension .png in {args.output}.")
-    print_if_debug("Converting AutoPlotter.plots to a tqdm instance.")
+        halo_catalogue_filename = f"{args.input[0]}/{args.catalogues[0]}"
+        print_if_debug(f"Loading halo catalogue at {halo_catalogue_filename}.")
 
-    if args.debug:
-        auto_plotter.plots = tqdm(auto_plotter.plots, desc="Creating figures")
+        registration_filename = (
+            None
+            if config.auto_plotter_registration is None
+            else f"{config.config_directory}/{config.auto_plotter_registration}"
+        )
 
-    auto_plotter.create_plots(
-        directory=args.output, file_extension=PLOT_FILE_EXTENSION, debug=args.debug
-    )
+        if registration_filename is not None:
+            print_if_debug(
+                f"Using registration functions contained in {registration_filename}"
+            )
 
-    print_if_debug("Creating AutoPlotterMetadata instance.")
-    auto_plotter_metadata = AutoPlotterMetadata(auto_plotter=auto_plotter)
-    metadata_filename = f"{args.input}/{args.metadata}_{args.snapshot[-9:-5]}.yml"
-    print(f"Creating and writing metadata to {metadata_filename}")
-    auto_plotter_metadata.write_metadata(metadata_filename)
+        catalogue = load(
+            halo_catalogue_filename, registration_file_path=registration_filename,
+        )
+        print_if_debug(f"Linking catalogue and AutoPlotter instance.")
+        auto_plotter.link_catalogue(catalogue=catalogue)
+
+        print_if_debug(f"Creating figures with extension .png in {args.output}.")
+        print_if_debug("Converting AutoPlotter.plots to a tqdm instance.")
+
+        if args.debug:
+            auto_plotter.plots = tqdm(auto_plotter.plots, desc="Creating figures")
+
+        auto_plotter.create_plots(
+            directory=args.output, file_extension=PLOT_FILE_EXTENSION, debug=args.debug
+        )
+
+        print_if_debug("Creating AutoPlotterMetadata instance.")
+        auto_plotter_metadata = AutoPlotterMetadata(auto_plotter=auto_plotter)
+        metadata_filename = (
+            f"{args.input[0]}/{args.metadata}_{args.snapshots[0][-9:-5]}.yml"
+        )
+        print_if_debug(f"Creating and writing metadata to {metadata_filename}")
+        auto_plotter_metadata.write_metadata(metadata_filename)
+    else:
+        # Need to generate our data again from the built-in yaml files.
+        metadata_filenames = [
+            f"{input}/{args.metadata}_{snapshot[-9:-5]}.yml"
+            for input, snapshot in zip(args.input, args.snapshots)
+        ]
+
+        print_if_debug(f"Attempting to recreate instances for {metadata_filenames}")
+        auto_plotter, auto_plotter_metadata, line_data = recreate_instances(
+            config=auto_plotter_configs,
+            paths=metadata_filenames,
+            names=run_names,
+            observational_data_directory=config.observational_data_directory,
+            file_extension=PLOT_FILE_EXTENSION,
+        )
+
+        if not os.path.exists(args.output):
+            os.mkdir(args.output)
+
+        print_if_debug("Converting AutoPlotter.plots to a tqdm instance.")
+        if args.debug:
+            auto_plotter.plots = tqdm(auto_plotter.plots, desc="Creating figures")
+
+        for plot in auto_plotter.plots:
+                recreate_single_figure(
+                    plot=plot,
+                    line_data=line_data,
+                    output_directory=args.output,
+                    file_type=PLOT_FILE_EXTENSION,
+                )
 
     # Now move onto using the ``config`` to generate plots from the actual data.
-
-    snapshot = load_snapshot(f"{args.input}/{args.snapshot}")
-    snapshot_metadata = snapshot.metadata
 
     if args.debug:
         config.scripts = tqdm(config.scripts, desc="Running Scripts")
@@ -185,13 +240,13 @@ if __name__ == "__main__":
                 "python3",
                 full_script_path,
                 "-s",
-                args.snapshot,
+                *args.snapshots,
                 "-c",
-                args.catalogue,
+                *args.catalogues,
                 "-d",
-                args.input,
+                *args.input,
                 "-n",
-                snapshot_metadata.run_name,
+                *run_names,
                 "-o",
                 args.output,
                 "-C",
@@ -199,14 +254,14 @@ if __name__ == "__main__":
             ]
         )
 
-    # Create the webpage
-    print_if_debug("Creating webpage.")
-    webpage = WebpageCreator()
-    webpage.add_auto_plotter_metadata(auto_plotter_metadata=auto_plotter_metadata)
-    webpage.add_config_metadata(config=config)
-    webpage.add_metadata(page_name=snapshot_metadata.run_name)
-    webpage.add_run_metadata(config=config, snapshots=[snapshot])
-    webpage.render_webpage()
-    webpage.save_html(f"{args.output}/index.html")
+        # Create the webpage
+        print_if_debug("Creating webpage.")
+        webpage = WebpageCreator()
+        webpage.add_auto_plotter_metadata(auto_plotter_metadata=auto_plotter_metadata)
+        webpage.add_config_metadata(config=config)
+        webpage.add_metadata(page_name=" | ".join(run_names))
+        webpage.add_run_metadata(config=config, snapshots=snapshots)
+        webpage.render_webpage()
+        webpage.save_html(f"{args.output}/index.html")
 
     print_if_debug("Done.")
