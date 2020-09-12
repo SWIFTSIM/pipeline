@@ -1,0 +1,6 @@
+Changelog for the ``swiftpipeline`` repository.
+
+Version 0.1.0
+-------------
+
+Initial release!
