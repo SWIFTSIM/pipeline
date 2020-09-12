@@ -10,6 +10,11 @@
     {% include "polyfill.js" %}
     </script>
     <script id="MathJax-script">
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+        }
+    };
     {% include "mathjax.js" %}
     </script>
     <meta charset="utf-8" />
