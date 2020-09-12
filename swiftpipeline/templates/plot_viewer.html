@@ -15,11 +15,13 @@
 {# Describe the runs that are included #}
 <div class="section run-descriptions">
     <h1>Included Runs</h1>
-    {% for run in runs %}
-    <div class="run">
-        {{ run.description }}
+    <div class="plot-container">
+        {% for run in runs %}
+        <div class="run">
+            {{ run.description }}
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
 
 {# Show off our figures! #}

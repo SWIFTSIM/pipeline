@@ -23,18 +23,18 @@ def format_number(number):
     """
 
     try:
-        units = f" {str(number.units)}"
+        units = f"\\; {number.units.latex_repr}"
     except:
         units = ""
 
     try:
         mantissa, exponent = ("%.3g" % number).split("e+")
-        exponent = f"×10<sup>{int(exponent)}</sup>"
+        exponent = f" \\times 10^{{{int(exponent)}}}"
     except:
         mantissa = "%.3g" % number
         exponent = ""
 
-    return f"{mantissa}{exponent}{units}"
+    return f"\({mantissa}{exponent}{units}\)"
 
 
 class WebpageCreator(object):
@@ -59,7 +59,7 @@ class WebpageCreator(object):
         """
 
         self.loader = PackageLoader("swiftpipeline", "templates")
-        self.environment = Environment(loader=self.loader)
+        self.environment = Environment(loader=self.loader, autoescape=select_autoescape(["js"]))
 
         # Initialise empty variables dictionary, with the versions of
         # this package and the velociraptor package used.

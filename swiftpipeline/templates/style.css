@@ -1,3 +1,5 @@
+{% raw %}
+
 /* Style file for the `plot_viewer` template. */
 
 
@@ -126,3 +128,5 @@ h1 {
     padding: 0.5em;
     margin: 0;
 }
+
+{% endraw %}
