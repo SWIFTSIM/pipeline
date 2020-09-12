@@ -1,1 +1,212 @@
 #!python3
+"""
+SWIFT-pipeline is a significantly more complex version of ``velociraptor-plot``.
+
+It uses configuration files along with additional plotting scripts to put together
+webpages that can represent whole cosmological simulations easily.
+
+You can create comparisons between different simulations using the sister program,
+``swift-compare``
+"""
+
+import argparse as ap
+from typing import Union
+
+parser = ap.ArgumentParser(
+    prog="swift-pipeline",
+    description=("Creates a webpage for you. TODO"),
+    epilog=("Example usage:\n"),
+)
+
+parser.add_argument(
+    "-C",
+    "--config",
+    type=str,
+    required=True,
+    help=("Configuration directory, containing config.yml."),
+)
+
+parser.add_argument(
+    "-c",
+    "--catalogue",
+    type=str,
+    required=True,
+    help="Name of the VELOCIraptor HDF5 .properties file. Required.",
+)
+
+parser.add_argument(
+    "-s",
+    "--snapshot",
+    required=True,
+    type=str,
+    help="Name of the snapshot file. Required.",
+)
+
+parser.add_argument(
+    "-o",
+    "--output",
+    type=str,
+    required=True,
+    help="Output directory for figures. Required.",
+)
+
+parser.add_argument(
+    "-i",
+    "--input",
+    type=str,
+    required=False,
+    default=".",
+    help=(
+        "Input directory where the snapshot and properties file are located. "
+        "Default is the current working directory."
+    ),
+)
+
+parser.add_argument(
+    "-d",
+    "--debug",
+    required=False,
+    default=False,
+    action="store_true",
+    help="Run in debug mode if this flag is present. Default: no.",
+)
+
+
+parser.add_argument(
+    "-m",
+    "--metadata",
+    required=False,
+    default="data",
+    help=(
+        "Base name of the written metadata file in the input directory. "
+        "By default this is data, leading to data_XXXX.yml"
+    ),
+)
+
+if __name__ == "__main__":
+    # Parse our lovely arguments and pass them to the velociraptor library
+    from velociraptor.autoplotter.objects import AutoPlotter
+    from velociraptor.autoplotter.metadata import AutoPlotterMetadata
+    from velociraptor import load
+
+    from swiftsimio import load as load_snapshot
+
+    from matplotlib import __version__
+    from matplotlib.pyplot import style
+
+    from subprocess import run
+    from glob import glob
+
+    from swiftpipeline.config import Config
+    from swiftpipeline.html import WebpageCreator
+
+    args = parser.parse_args()
+
+    PLOT_FILE_EXTENSION = "png"
+
+    # Set up some basic debugging things
+    if args.debug:
+        from tqdm import tqdm
+
+    def print_if_debug(string: str):
+        if args.debug:
+            print(string)
+
+    print_if_debug("Running in debug mode. Arguments given are:")
+    for name, value in dict(vars(args)).items():
+        print_if_debug(f"{name}: {value}")
+
+    config = Config(config_directory=args.config)
+
+    print_if_debug(f"Matplotlib version: {__version__}.")
+    if config.matplotlib_stylesheet != "default":
+        stylesheet_path = f"{config.config_directory}/{config.matplotlib_stylesheet}"
+        print_if_debug(f"Applying matplotlib stylesheet at {stylesheet_path}.")
+        style.use(stylesheet_path)
+
+    print_if_debug(
+        f"Generating initial AutoPlotter instance for {config.auto_plotter_directory}."
+    )
+
+    auto_plotter = AutoPlotter(
+        glob(f"{config.config_directory}/{config.auto_plotter_directory}/*.yml"),
+        observational_data_directory=config.observational_data_directory,
+    )
+
+    halo_catalogue_filename = f"{args.input}/{args.catalogue}"
+    print_if_debug(f"Loading halo catalogue at {halo_catalogue_filename}.")
+
+    registration_filename = (
+        None
+        if config.auto_plotter_registration is None
+        else f"{config.config_directory}/{config.auto_plotter_registration}"
+    )
+
+    if registration_filename is not None:
+        print_if_debug(
+            f"Using registration functions contained in {registration_filename}"
+        )
+
+    catalogue = load(
+        halo_catalogue_filename, registration_file_path=registration_filename,
+    )
+    print_if_debug(f"Linking catalogue and AutoPlotter instance.")
+    auto_plotter.link_catalogue(catalogue=catalogue)
+
+    print_if_debug(f"Creating figures with extension .png in {args.output}.")
+    print_if_debug("Converting AutoPlotter.plots to a tqdm instance.")
+
+    if args.debug:
+        auto_plotter.plots = tqdm(auto_plotter.plots, desc="Creating figures")
+
+    auto_plotter.create_plots(
+        directory=args.output, file_extension=PLOT_FILE_EXTENSION, debug=args.debug
+    )
+
+    print_if_debug("Creating AutoPlotterMetadata instance.")
+    auto_plotter_metadata = AutoPlotterMetadata(auto_plotter=auto_plotter)
+    metadata_filename = f"{args.input}/{args.metadata}_{args.snapshot[-9:-5]}.yml"
+    print(f"Creating and writing metadata to {metadata_filename}")
+    auto_plotter_metadata.write_metadata(metadata_filename)
+
+    # Now move onto using the ``config`` to generate plots from the actual data.
+
+    snapshot = load_snapshot(f"{args.input}/{args.snapshot}")
+    snapshot_metadata = snapshot.metadata
+
+    if args.debug:
+        config.scripts = tqdm(config.scripts, desc="Running Scripts")
+
+    for script in config.scripts:
+        full_script_path = f"{config.config_directory}/{script.filename}"
+
+        run(
+            [
+                "python3",
+                full_script_path,
+                "-s",
+                args.snapshot,
+                "-c",
+                args.catalogue,
+                "-d",
+                args.input,
+                "-n",
+                snapshot_metadata.run_name,
+                "-o",
+                args.output,
+                "-C",
+                config.config_directory,
+            ]
+        )
+
+    # Create the webpage
+    print_if_debug("Creating webpage.")
+    webpage = WebpageCreator()
+    webpage.add_auto_plotter_metadata(auto_plotter_metadata=auto_plotter_metadata)
+    webpage.add_config_metadata(config=config)
+    webpage.add_metadata(page_name=snapshot_metadata.run_name)
+    webpage.add_run_metadata(config=config, snapshots=[snapshot])
+    webpage.render_webpage()
+    webpage.save_html(f"{args.output}/index.html")
+
+    print_if_debug("Done.")
