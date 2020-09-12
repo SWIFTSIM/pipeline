@@ -22,6 +22,6 @@ setuptools.setup(
         "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
         "Operating System :: OS Independent",
     ],
-    install_requires=[],
+    install_requires=["swiftsimio", "matplotlib", "jinja2", "velociraptor", "astropy", "unyt"],
     scripts=["swift-pipeline"],
 )

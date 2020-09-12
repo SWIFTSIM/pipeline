@@ -1,0 +1,10 @@
+astropy
+black
+Jinja2
+matplotlib
+numba
+numpy
+pytest
+PyYAML
+swiftsimio
+unyt
