@@ -157,6 +157,10 @@ if __name__ == "__main__":
     ]
     run_names = [data.metadata.run_name for data in snapshots]
 
+    observational_data_path = (
+        f"{config.config_directory}/{config.observational_data_directory}/data"
+    )
+
     if len(args.snapshots) == 1:
         # Run the pipeline based on the arguments if only a single simulation is
         # included and generate the metadata yaml file.
@@ -165,8 +169,7 @@ if __name__ == "__main__":
         )
 
         auto_plotter = AutoPlotter(
-            auto_plotter_configs,
-            observational_data_directory=config.observational_data_directory,
+            auto_plotter_configs, observational_data_directory=observational_data_path,
         )
 
         halo_catalogue_filename = f"{args.input[0]}/{args.catalogues[0]}"
@@ -184,7 +187,7 @@ if __name__ == "__main__":
             )
 
         catalogue = load(
-            halo_catalogue_filename, registration_file_path=registration_filename,
+            halo_catalogue_filename, disregard_units=True, registration_file_path=registration_filename,
         )
         print_if_debug(f"Linking catalogue and AutoPlotter instance.")
         auto_plotter.link_catalogue(catalogue=catalogue)
@@ -218,7 +221,7 @@ if __name__ == "__main__":
             config=auto_plotter_configs,
             paths=metadata_filenames,
             names=run_names,
-            observational_data_directory=config.observational_data_directory,
+            observational_data_directory=observational_data_path,
             file_extension=PLOT_FILE_EXTENSION,
         )
 
@@ -230,12 +233,15 @@ if __name__ == "__main__":
             auto_plotter.plots = tqdm(auto_plotter.plots, desc="Creating figures")
 
         for plot in auto_plotter.plots:
-            recreate_single_figure(
-                plot=plot,
-                line_data=line_data,
-                output_directory=args.output,
-                file_type=PLOT_FILE_EXTENSION,
-            )
+            try:
+                recreate_single_figure(
+                    plot=plot,
+                    line_data=line_data,
+                    output_directory=args.output,
+                    file_type=PLOT_FILE_EXTENSION,
+                )
+            except:
+                print_if_debug(f"Unable to create figure {plot.filename}.")
 
     # Now move onto using the ``config`` to generate plots from the actual data.
 
@@ -264,14 +270,14 @@ if __name__ == "__main__":
             ]
         )
 
-        # Create the webpage
-        print_if_debug("Creating webpage.")
-        webpage = WebpageCreator()
-        webpage.add_auto_plotter_metadata(auto_plotter_metadata=auto_plotter_metadata)
-        webpage.add_config_metadata(config=config)
-        webpage.add_metadata(page_name=" | ".join(run_names))
-        webpage.add_run_metadata(config=config, snapshots=snapshots)
-        webpage.render_webpage()
-        webpage.save_html(f"{args.output}/index.html")
+    # Create the webpage`
+    print_if_debug("Creating webpage.")
+    webpage = WebpageCreator()
+    webpage.add_auto_plotter_metadata(auto_plotter_metadata=auto_plotter_metadata)
+    webpage.add_config_metadata(config=config)
+    webpage.add_metadata(page_name=" | ".join(run_names))
+    webpage.add_run_metadata(config=config, snapshots=snapshots)
+    webpage.render_webpage()
+    webpage.save_html(f"{args.output}/index.html")
 
     print_if_debug("Done.")
