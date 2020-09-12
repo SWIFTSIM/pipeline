@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_name }}{% endblock %}
+
+{% block navigation %}
+{# Purely internal navigation links to take you up/down the page #}
+<ul class="nav">
+    {% for section in sections %}
+    <li><a href="#{{ section.id }}">{{ section.title }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}
+
+{% block content %}
+{# Describe the runs that are included #}
+<div class="section run-descriptions">
+    <h1>Included Runs</h1>
+    {% for run in runs %}
+    <div class="run">
+        {{ run.description }}
+    </div>
+    {% endfor %}
+</div>
+
+{# Show off our figures! #}
+{% for section in sections %}
+<div class="section" id="{{ section.id }}">
+    <h1>{{ section.title }}</h1>
+    <div class="plot-container">
+        {% for plot in section.plots %}
+        <div class="plot">
+            <img src="{{ plot.filename }}" />
+            <h3>{{ plot.title }}</h3>
+            <p>{{ plot.caption }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block footer %}
+<p>
+    Created with version {{ pipeline_version }} of the pipeline
+    with version {{ velociraptor_version }} of the velociraptor
+    python library on {{ creation_date }}.
+</p>
+{% endblock %}

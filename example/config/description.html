@@ -1,0 +1,9 @@
+<h3>{{ data.metadata.run_name }}</h3>
+
+<h4>Basic</h4>
+<ul>
+    <li>Box-size {{ data.metadata.boxsize }}</li>
+    <li>Dark matter particle mass: {{ data.dark_matter.masses[0].to("Solar_Mass") | format_number }}</li>
+    <li>Gas particle mass: {{ data.gas.masses.min().to("Solar_Mass") | format_number }}</li>
+    <li>Cube root of particle number: {{ (data.metadata.n_dark_matter**(1/3)+0.01) | int }}
+</ul>

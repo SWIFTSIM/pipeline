@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% block head %}
+    <link rel="stylesheet" href="style.css" />
+    <meta charset="utf-8" />
+    <title>{% block title %}{% endblock %} - SWIFT Pipeline</title>
+    {% endblock %}
+</head>
+
+<body>
+    <div id="navigation">{% block navigation %}{% endblock %}</div>
+
+    <div id="content">{% block content %}{% endblock %}</div>
+
+    <div id="footer">
+        {% block footer %}{% endblock %}
+    </div>
+</body>
+
+</html>

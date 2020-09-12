@@ -1,0 +1,128 @@
+/* Style file for the `plot_viewer` template. */
+
+
+/* Text */
+* {
+    font-family: 'Times New Roman', Times, serif;
+}
+
+html, body {
+    padding: 0.0;
+    margin: 0.0;
+}
+
+h1 {
+    margin-top: 0.0;
+}
+
+/* Navigation */
+
+#navigation {
+    background-color: #DDDDDD;
+    position: sticky;
+    top: 0;
+    width: 100%;
+}
+
+.nav {
+    list-style-type: none;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav li {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+.nav li a {
+    text-decoration: none;
+    display: block;
+    padding: 0.5em;
+    color: black;
+    margin: 0;
+}
+
+.nav li a:hover {
+    background-color: white;
+}
+
+/* Sections and plots */
+
+.section {
+    padding: 1em;
+    margin: 0;
+}
+
+.plot-container {
+    padding: 0;
+    margin: 0.0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.plot {
+    width: 20em;
+
+    padding: 1em;
+    margin-bottom: 1em;
+    margin-right: 1em;
+
+    border: 1px solid grey;
+    border-radius: 2px;
+    box-shadow: 1px 1px 5px #BBBBBB;
+}
+
+.plot img {
+    width: 100%;
+}
+
+.plot p {
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.plot h3 {
+    margin-top: 0.5em;
+    margin-bottom: 0.0em;
+}
+
+/* Runs */
+
+.run {
+    width: 20em;
+
+    padding: 1em;
+    margin-bottom: 1em;
+    margin-right: 1em;
+
+    border: 1px solid grey;
+    border-radius: 2px;
+    box-shadow: 1px 1px 5px #BBBBBB;
+    background-color: #EEE;
+}
+
+.run h3 {
+    margin-top: 0.0;
+}
+
+.run ul {
+    margin-left: 0.0;
+}
+
+/* Footer */
+
+#footer {
+    background-color: #DDDDDD;
+    margin: 0;
+    padding: 0;
+    bottom: 0;
+}
+
+#footer p {
+    padding: 0.5em;
+    margin: 0;
+}
