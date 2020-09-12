@@ -170,7 +170,7 @@ class WebpageCreator(object):
                     caption=script.caption,
                 )
                 for script in config.scripts
-                if section == section
+                if script.section == section
             ]
 
             self.variables["sections"].append(
