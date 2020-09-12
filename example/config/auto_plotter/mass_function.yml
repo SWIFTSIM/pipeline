@@ -1,0 +1,71 @@
+stellar_mass_function_30:
+  type: "massfunction"
+  legend_loc: "lower left"
+  number_of_bins: 25
+  x:
+    quantity: "apertures.mass_star_30_kpc"
+    units: Solar_Mass
+    start: 1e7
+    end: 1e12
+  y:
+    units: 1/Mpc**3
+    start: 1e-6
+    end: 0.316 # (1e-0.5)
+  metadata:
+    title: Stellar Mass Function (30 kpc aperture)
+    caption: 30 kpc aperture GSMF, showing all galaxies with a fixed bin-width of 0.2 dex.
+    section: Stellar Mass Function
+
+stellar_mass_function_100:
+  type: "massfunction"
+  legend_loc: "lower left"
+  number_of_bins: 25
+  x:
+    quantity: "apertures.mass_star_100_kpc"
+    units: Solar_Mass
+    start: 1e7
+    end: 1e12
+  y:
+    units: 1/Mpc**3
+    start: 1e-6
+    end: 0.316 # (1e-0.5)
+  metadata:
+    title: Stellar Mass Function (100 kpc aperture)
+    caption: 100 kpc aperture GSMF, showing all galaxies with a fixed bin-width of 0.2 dex.
+    section: Stellar Mass Function
+
+adaptive_stellar_mass_function_30:
+  type: "adaptivemassfunction"
+  legend_loc: "lower left"
+  number_of_bins: 25
+  x:
+    quantity: "apertures.mass_star_30_kpc"
+    units: Solar_Mass
+    start: 1e7
+    end: 1e12
+  y:
+    units: 1/Mpc**3
+    start: 1e-6
+    end: 0.316 # (1e-0.5)
+  metadata:
+    title: Stellar Mass Function (30 kpc aperture, adaptive)
+    caption: 30 kpc aperture GSMF, showing all galaxies with an adaptive bin-width.
+    section: Stellar Mass Function
+
+adaptive_stellar_mass_function_100:
+  type: "adaptivemassfunction"
+  legend_loc: "lower left"
+  number_of_bins: 25
+  x:
+    quantity: "apertures.mass_star_100_kpc"
+    units: Solar_Mass
+    start: 1e7
+    end: 1e12
+  y:
+    units: 1/Mpc**3
+    start: 1e-6
+    end: 0.316 # (1e-0.5)
+  metadata:
+    title: Stellar Mass Function (100 kpc aperture, adaptive)
+    caption: 100 kpc aperture GSMF, showing all galaxies with an adaptive bin-width.
+    section: Stellar Mass Function
