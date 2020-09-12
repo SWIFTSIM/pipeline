@@ -32,7 +32,7 @@ xtick.direction: in
 ytick.direction: in
 
 # Setup Durham Colours
-axes.prop_cycle: cycler('color', ['55E18E', '00AEFF','FF8C40', 'A646FF', 'CC4314', '5766B3', '68246D'])
+axes.prop_cycle: cycler('color', ['00AEFF','FF8C40', 'CC4314', '5766B3', '68246D', '55E18E', 'A646FF'])
 
 # Use a non-clashing default colour map
 image.cmap: cividis
