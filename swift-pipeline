@@ -4,9 +4,6 @@ SWIFT-pipeline is a significantly more complex version of ``velociraptor-plot``.
 
 It uses configuration files along with additional plotting scripts to put together
 webpages that can represent whole cosmological simulations easily.
-
-You can create comparisons between different simulations using the sister program,
-``swift-compare``
 """
 
 import argparse as ap
@@ -14,8 +11,21 @@ from typing import Union
 
 parser = ap.ArgumentParser(
     prog="swift-pipeline",
-    description=("Creates a webpage for you. TODO"),
-    epilog=("Example usage:\n"),
+    description=(
+        "Creates a webpage containing many figures out of your SWIFT runs. "
+        "When creating this page, also creates a metadata file that can be used "
+        "later with this program to produce comparison webpages between multiple "
+        "simulations."
+    ),
+    epilog=(
+        "Example usage:\n"
+        "swift-pipeline -C ~/config -c example_0000.properties -s snapshot_0000.hdf5 "
+        "-o ~/plots/example_0000 -i /path/to/my/sim\n\n"
+        "Example creating comparisons:\n"
+        "swift-pipeline -C ~/config -c example_0000.properties example_0000.properties "
+        "-s snapshot_0000.hdf5 snapshot_0000.hdf5 "
+        "-o ~/plots/example_0000 -i /path/to/my/first/sim /path/to/my/second/sim\n\n"
+    ),
 )
 
 parser.add_argument(
@@ -220,12 +230,12 @@ if __name__ == "__main__":
             auto_plotter.plots = tqdm(auto_plotter.plots, desc="Creating figures")
 
         for plot in auto_plotter.plots:
-                recreate_single_figure(
-                    plot=plot,
-                    line_data=line_data,
-                    output_directory=args.output,
-                    file_type=PLOT_FILE_EXTENSION,
-                )
+            recreate_single_figure(
+                plot=plot,
+                line_data=line_data,
+                output_directory=args.output,
+                file_type=PLOT_FILE_EXTENSION,
+            )
 
     # Now move onto using the ``config`` to generate plots from the actual data.
 
