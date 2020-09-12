@@ -12,6 +12,7 @@ direct_read = {
     "auto_plotter_registration": None,
     "observational_data_directory": None,
     "matplotlib_stylesheet": "default",
+    "description_template": None,
 }
 
 
@@ -30,16 +31,19 @@ class Script(object):
     # Section heading; used to classify this with similar figures
     # in the output.
     section: str
+    # Plot title; written above the caption
+    title: str
 
     def __init__(self, script_dict: dict):
         """
         Takes the dictionary and extracts it to inner variables.
         """
 
-        self.filename = script_dict.get("filename", None)
-        self.caption = script_dict.get("caption", None)
-        self.output_file = script_dict.get("output_file", None)
-        self.section = script_dict.get("section", None)
+        self.filename = script_dict.get("filename", "")
+        self.caption = script_dict.get("caption", "")
+        self.output_file = script_dict.get("output_file", "")
+        self.section = script_dict.get("section", "")
+        self.title = script_dict.get("title", "")
 
         return
 
