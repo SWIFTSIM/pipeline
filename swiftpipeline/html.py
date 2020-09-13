@@ -136,7 +136,7 @@ class WebpageCreator(object):
                     caption=plot.caption,
                 )
                 for plot in auto_plotter_metadata.metadata
-                if plot.section == section
+                if plot.section == section and plot.show_on_webpage
             ]
 
             self.variables["sections"].append(
@@ -170,7 +170,7 @@ class WebpageCreator(object):
                     caption=script.caption,
                 )
                 for script in config.scripts
-                if script.section == section
+                if script.section == section and script.show_on_webpage
             ]
 
             self.variables["sections"].append(

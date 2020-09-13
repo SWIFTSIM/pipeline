@@ -33,6 +33,9 @@ class Script(object):
     section: str
     # Plot title; written above the caption
     title: str
+    # Show on webpage; Defaults to True but used to disable webpage plotting
+    # in the config file if required.
+    show_on_webpage: bool
 
     def __init__(self, script_dict: dict):
         """
@@ -44,6 +47,7 @@ class Script(object):
         self.output_file = script_dict.get("output_file", "")
         self.section = script_dict.get("section", "")
         self.title = script_dict.get("title", "")
+        self.show_on_webpage = script_dict.get("show_on_webpage", True)
 
         return
 
