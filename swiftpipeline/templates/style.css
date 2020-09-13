@@ -35,7 +35,8 @@ h1 {
 
 .nav li {
     display: inline-block;
-    margin: 0;
+    margin: 0.25em;
+    margin-right: 0;
     padding: 0;
 }
 
@@ -44,7 +45,12 @@ h1 {
     display: block;
     padding: 0.5em;
     color: black;
+    background-color: #EEE;
     margin: 0;
+    font-size: 9pt;
+    border: 1px solid grey;
+    border-radius: 2px;
+    box-shadow: 1px 1px 5px #BBBBBB;
 }
 
 .nav li a:hover {
