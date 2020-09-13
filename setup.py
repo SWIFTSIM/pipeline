@@ -24,4 +24,5 @@ setuptools.setup(
     ],
     install_requires=["swiftsimio", "matplotlib", "jinja2", "velociraptor", "astropy", "unyt"],
     scripts=["swift-pipeline"],
+    include_package_data=True,
 )
