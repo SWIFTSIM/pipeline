@@ -146,8 +146,11 @@ if __name__ == "__main__":
         print_if_debug(f"Applying matplotlib stylesheet at {stylesheet_path}.")
         style.use(stylesheet_path)
 
-    auto_plotter_configs = glob(
-        f"{config.config_directory}/{config.auto_plotter_directory}/*.yml"
+    # Reverse so most recently modified is at the top.
+    auto_plotter_configs = list(
+        reversed(
+            glob(f"{config.config_directory}/{config.auto_plotter_directory}/*.yml")
+        )
     )
 
     print_if_debug("Loading snapshot metadata")
@@ -187,7 +190,9 @@ if __name__ == "__main__":
             )
 
         catalogue = load(
-            halo_catalogue_filename, disregard_units=True, registration_file_path=registration_filename,
+            halo_catalogue_filename,
+            disregard_units=True,
+            registration_file_path=registration_filename,
         )
         print_if_debug(f"Linking catalogue and AutoPlotter instance.")
         auto_plotter.link_catalogue(catalogue=catalogue)
