@@ -1,5 +1,9 @@
 # Example configuration file for a COLIBRE-like simulation
 
+# Location of the 'observational data' repository and its compiled
+# contents (relative to the config)
+observational_data_directory: observational_data
+
 # Location of your other .yml files that are passed to the
 # velociraptor auto plotter (these describe your scaling)
 # relation figures. Also required is the registration file
@@ -8,15 +12,11 @@
 auto_plotter_directory: auto_plotter
 auto_plotter_registration: registration.py
 
-# Location of the 'observational data' repository and its compiled
-# contents.
-observational_data_directory: observational_data
-
-# Style sheet to be used throughout with plotting
+# Style sheet to be used throughout with plotting (stored inside config)
 matplotlib_stylesheet: mnras.mplstyle
 
 # Jinja2 template that gets fed the swiftsimio metadata
-# object for you to describe the run with.
+# object for you to describe the run with (relative to config)
 description_template: description.html
 
 # Location and description of additional figures
