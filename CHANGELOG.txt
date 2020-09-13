@@ -1,5 +1,15 @@
 Changelog for the ``swiftpipeline`` repository.
 
+Version 0.1.1
+-------------
+
+Minor bugfixes, and:
+
++ Ensured that pipeline figures are shown in the order of most recently
+  edited config file to least recently edited,
++ Added ability to _not_ plot some figures in the resultant webpage,
++ Changed navbar to a button style.
+
 Version 0.1.0
 -------------
 
