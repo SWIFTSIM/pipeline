@@ -257,6 +257,22 @@ if __name__ == "__main__":
             except:
                 print_if_debug(f"Unable to create figure {plot.filename}.")
 
+    # Now that we have auto_plotter_metadata we can use it to check if we have
+    # inadvertently created multiple plots with the same filename.
+    if args.debug:
+        figure_filenames = {plot.filename : 0 for plot in auto_plotter_metadata.plots}
+        
+        for plot in auto_plotter_metadata.plots:
+            figure_filenames[plot.filename] += 1
+
+        for filename, number_of_figures in figure_filenames.items():
+            if number_of_figures > 1:
+                print_if_debug(
+                    f"{number_of_figures} figures with filename "
+                    f"{filename}.{PLOT_FILE_EXTENSION} have been created. "
+                    "This will cause overwriting, and may not be intentional."
+                )
+
     # Now move onto using the ``config`` to generate plots from the actual data.
 
     if args.debug:
