@@ -1,5 +1,15 @@
 Changelog for the ``swiftpipeline`` repository.
 
+Version 0.1.4
+-------------
+
+Minor updates including:
+
++ Added styling for tables included in webpages through the `description.html`
++ Added ability to use custom CSS for styling webpages.
++ Checks if paths to data `yml` files exist before creating comparisons.
++ Checks if more than one figure is created with a given filename.
+
 Version 0.1.3
 -------------
 
