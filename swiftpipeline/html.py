@@ -59,7 +59,9 @@ class WebpageCreator(object):
         """
 
         self.loader = PackageLoader("swiftpipeline", "templates")
-        self.environment = Environment(loader=self.loader, autoescape=select_autoescape(["js"]))
+        self.environment = Environment(
+            loader=self.loader, autoescape=select_autoescape(["js"])
+        )
 
         # Initialise empty variables dictionary, with the versions of
         # this package and the velociraptor package used.
@@ -197,14 +199,20 @@ class WebpageCreator(object):
         environment = Environment(loader=loader)
         environment.filters["format_number"] = format_number
 
-        self.variables["runs"] = [
-            dict(
-                description=environment.get_template(
-                    config.description_template
-                ).render(data=data)
-            )
-            for data in snapshots
-        ]
+        if config.description_template is not None:
+            self.variables["runs"] = [
+                dict(
+                    description=environment.get_template(
+                        config.description_template
+                    ).render(data=data),
+                )
+                for data in snapshots
+            ]
+
+        if config.custom_css is not None:
+            self.variables["custom_css"] = environment.get_template(
+                config.custom_css
+            ).render()
 
         return
 

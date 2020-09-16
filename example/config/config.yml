@@ -18,6 +18,8 @@ matplotlib_stylesheet: mnras.mplstyle
 # Jinja2 template that gets fed the swiftsimio metadata
 # object for you to describe the run with (relative to config)
 description_template: description.html
+# Custom CSS to change the appearance of the webpage 
+custom_css: custom.css
 
 # Location and description of additional figures
 scripts:

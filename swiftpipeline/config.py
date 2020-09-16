@@ -13,6 +13,7 @@ direct_read = {
     "observational_data_directory": None,
     "matplotlib_stylesheet": "default",
     "description_template": None,
+    "custom_css": None,
 }
 
 
