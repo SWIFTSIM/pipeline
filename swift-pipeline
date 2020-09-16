@@ -221,6 +221,15 @@ if __name__ == "__main__":
             for input, snapshot in zip(args.input, args.snapshots)
         ]
 
+        if args.debug:
+            for metadata_filename in metadata_filenames:
+                if not os.path.exists(metadata_filename):
+                    print_if_debug(
+                        f"Unable to find {metadata_filename}, ensure the pipeline has "
+                        "been run in standalone mode for this simulation before "
+                        "attempting comparisons."
+                    )
+
         print_if_debug(f"Attempting to recreate instances for {metadata_filenames}")
         auto_plotter, auto_plotter_metadata, line_data = recreate_instances(
             config=auto_plotter_configs,
