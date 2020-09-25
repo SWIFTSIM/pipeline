@@ -297,6 +297,8 @@ if __name__ == "__main__":
                 args.output,
                 "-C",
                 config.config_directory,
+		"-a",
+		script.additional_args,
             ]
         )
 
