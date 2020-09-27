@@ -132,4 +132,3 @@ class Config(object):
         self.scripts = [Script(script_dict=script_dict) for script_dict in raw_scripts]
 
         return
-

@@ -6,6 +6,7 @@ import argparse as ap
 from typing import List, Union, Tuple, Optional
 from swiftpipeline.config import Config
 
+
 class ScriptArgumentParser(object):
     """
     Script argument parser for ``swiftpipeline`` additional scripts.
@@ -146,11 +147,13 @@ class ScriptArgumentParser(object):
             if args.run_names is not None
             else [None] * self.number_of_inputs
         )
-        print (args.additional_args)
-        if args.additional_args == ['']:
+        print(args.additional_args)
+        if args.additional_args == [""]:
             self.additional_args = None
         else:
-            self.additional_args = [s.lstrip() for s in args.additional_args[0].split(',')]
+            self.additional_args = [
+                s.lstrip() for s in args.additional_args[0].split(",")
+            ]
         self.output_directory = args.output_directory
         self.config_directory = args.config
 

@@ -28,3 +28,4 @@ scripts:
     output_file: density_temperature.png
     section: Density-Temperature
     title: Density-Temperature
+    additional_args: regular, cividis

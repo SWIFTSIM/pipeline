@@ -8,7 +8,8 @@ import numpy as np
 from swiftsimio import load
 
 from unyt import mh, cm, Gyr
-from matplotlib.colors import LogNorm
+from matplotlib.colors import LogNorm, Normalize, ListedColormap, BoundaryNorm
+from matplotlib.cm import get_cmap
 from matplotlib.animation import FuncAnimation
 
 # Set the limits of the figure.
@@ -93,6 +94,7 @@ def make_single_image(
     temperature_bounds,
     bins,
     output_path,
+    add_args
 ):
     """
     Makes a single plot of rho-T
@@ -108,8 +110,16 @@ def make_single_image(
 
     vmax = np.max([np.max(hist) for hist in hists])
 
+    cmap_suffix = ''
+    if add_args[0] == 'inverted':
+        cmap_suffix = '_r'
+    elif add_args[1] != 'regular':
+        raise Exception(f'colormap ordering {add_args[1]} not understood')
+
+    cmap = get_cmap(add_args[1]+cmap_suffix)    
+
     for hist, name, axis in zip(hists, names, ax.flat):
-        mappable = axis.pcolormesh(d, T, hist, norm=LogNorm(vmin=1, vmax=vmax))
+        mappable = axis.pcolormesh(d, T, hist, norm=LogNorm(vmin=1, vmax=vmax), cmap=cmap)
         axis.text(0.025, 0.975, name, ha="left", va="top", transform=axis.transAxes)
 
     fig.colorbar(mappable, ax=ax.ravel().tolist(), label="Number of particles")
@@ -123,6 +133,12 @@ if __name__ == "__main__":
     from swiftpipeline.argumentparser import ScriptArgumentParser
 
     arguments = ScriptArgumentParser(description="Basic density-temperature figure.")
+
+
+    add_args = ["segmented", "inverted"]
+    if arguments.additional_args:
+        for i in range(len(arguments.additional_args)):
+            add_args[i] = arguments.additional_args[i]
 
     snapshot_filenames = [
         f"{directory}/{snapshot}"
@@ -141,5 +157,6 @@ if __name__ == "__main__":
         temperature_bounds=temperature_bounds,
         bins=bins,
         output_path=arguments.output_directory,
+        add_args=add_args
     )
 
