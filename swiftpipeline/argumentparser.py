@@ -147,7 +147,6 @@ class ScriptArgumentParser(object):
             if args.run_names is not None
             else [None] * self.number_of_inputs
         )
-        print(args.additional_args)
         if args.additional_args == [""]:
             self.additional_args = None
         else:
