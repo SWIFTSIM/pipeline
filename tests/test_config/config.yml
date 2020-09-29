@@ -22,4 +22,6 @@ scripts:
     output_file: density_temperature.png
     section: Density-Temperature
     title: Density-Temperature Diagram
-    additional_args: regular, cividis
+    additional_args:
+      cmap: cividis
+      cmap_order: regular

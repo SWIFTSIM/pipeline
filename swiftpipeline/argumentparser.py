@@ -46,7 +46,7 @@ class ScriptArgumentParser(object):
     config: Config
 
     # additional arguments for a given script
-    additional_args: str
+    additional_args: List[Optional[(str)]]
 
     def __init__(self, description):
         """
@@ -147,14 +147,13 @@ class ScriptArgumentParser(object):
             if args.run_names is not None
             else [None] * self.number_of_inputs
         )
-        if args.additional_args == [""]:
-            self.additional_args = None
-        else:
-            self.additional_args = [
-                s.lstrip() for s in args.additional_args[0].split(",")
-            ]
         self.output_directory = args.output_directory
         self.config_directory = args.config
+
+        # parse additional arguments
+        for i in range(len(args.additional_args)//2):
+            setattr(self, args.additional_args[::2][i],
+                    args.additional_args[1::2][i])
 
         self.config = Config(config_directory=self.config_directory)
 

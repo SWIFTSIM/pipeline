@@ -298,7 +298,7 @@ if __name__ == "__main__":
                 "-C",
                 config.config_directory,
                 "-a",
-                script.additional_args,
+                *[a for pair in list(script.additional_args.items()) for a in pair],
             ]
         )
 
