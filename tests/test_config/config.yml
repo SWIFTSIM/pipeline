@@ -23,5 +23,4 @@ scripts:
     section: Density-Temperature
     title: Density-Temperature Diagram
     additional_args:
-      cmap: cividis
-      cmap_order: regular
+      quantity_type: hydro
