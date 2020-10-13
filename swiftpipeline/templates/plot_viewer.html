@@ -25,7 +25,7 @@
 </div>
 
 {# Show off our figures! #}
-{% for section in sections %}
+{% for section in sections | sort(attribute="title") %}
 <div class="section" id="{{ section.id }}">
     <h1>{{ section.title }}</h1>
     <div class="plot-container">
