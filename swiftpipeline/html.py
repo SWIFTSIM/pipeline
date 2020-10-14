@@ -34,7 +34,43 @@ def format_number(number):
         mantissa = "%.3g" % number
         exponent = ""
 
-    return f"\({mantissa}{exponent}{units}\)"
+    return f"\\({mantissa}{exponent}{units}\\)"
+
+
+def get_if_present_float(dictionary, value: str, unit=None):
+    """
+    A replacement for .get() that also formats the number if present.
+    
+    Assumes data should be a float.
+    """
+
+    try:
+        value = float(dictionary["value"])
+
+        if unit is not None:
+            value = unyt.unyt_quantity(value, unit)
+
+        return format_number(value)
+    except KeyError:
+        return ""
+
+
+def get_if_present_int(dictionary, value: str, unit=None):
+    """
+    A replacement for .get() that also formats the number if present.
+    
+    Assumes data should be an integer.
+    """
+
+    try:
+        value = int(dictionary["value"])
+
+        if unit is not None:
+            value = unyt.unyt_quantity(value, unit)
+
+        return format_number(value)
+    except KeyError:
+        return ""
 
 
 class WebpageCreator(object):
@@ -197,7 +233,10 @@ class WebpageCreator(object):
 
         loader = FileSystemLoader(config.config_directory)
         environment = Environment(loader=loader)
+
         environment.filters["format_number"] = format_number
+        environment.filters["get_if_present_float"] = get_if_present_float
+        environment.filters["get_if_present_int"] = get_if_present_int
 
         if config.description_template is not None:
             self.variables["runs"] = [
