@@ -37,7 +37,7 @@ def format_number(number):
     return f"\\({mantissa}{exponent}{units}\\)"
 
 
-def get_if_present_float(dictionary, value: str, unit=None):
+def get_if_present_float(dictionary, value: str, input_unit=None, output_unit=None):
     """
     A replacement for .get() that also formats the number if present.
     
@@ -47,15 +47,18 @@ def get_if_present_float(dictionary, value: str, unit=None):
     try:
         value = float(dictionary["value"])
 
-        if unit is not None:
-            value = unyt.unyt_quantity(value, unit)
+        if input_unit is not None:
+            value = unyt.unyt_quantity(value, input_unit)
+
+            if output_unit is not None:
+                value.convert_to_units(output_unit)
 
         return format_number(value)
     except KeyError:
         return ""
 
 
-def get_if_present_int(dictionary, value: str, unit=None):
+def get_if_present_int(dictionary, value: str, input_unit=None, output_unit=None):
     """
     A replacement for .get() that also formats the number if present.
     
@@ -65,8 +68,11 @@ def get_if_present_int(dictionary, value: str, unit=None):
     try:
         value = int(dictionary["value"])
 
-        if unit is not None:
-            value = unyt.unyt_quantity(value, unit)
+        if input_unit is not None:
+            value = unyt.unyt_quantity(value, input_unit)
+
+            if output_unit is not None:
+                value.convert_to_units(output_unit)
 
         return format_number(value)
     except KeyError:
