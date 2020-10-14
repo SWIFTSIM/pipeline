@@ -45,7 +45,7 @@ def get_if_present_float(dictionary, value: str, input_unit=None, output_unit=No
     """
 
     try:
-        value = float(dictionary["value"])
+        value = float(dictionary[value])
 
         if input_unit is not None:
             value = unyt.unyt_quantity(value, input_unit)
@@ -66,7 +66,7 @@ def get_if_present_int(dictionary, value: str, input_unit=None, output_unit=None
     """
 
     try:
-        value = int(dictionary["value"])
+        value = int(dictionary[value])
 
         if input_unit is not None:
             value = unyt.unyt_quantity(value, input_unit)
