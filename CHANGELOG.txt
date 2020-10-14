@@ -1,5 +1,15 @@
 Changelog for the ``swiftpipeline`` repository.
 
+Version 0.1.5
+-------------
+
+Minor styling updates:
+
++ Added new functions, `get_if_present_{float,int}` for getting items from
+  dictionaries and formatting them with(out) units that may not exist.
++ Used a stable sort for the sections to enable easier comparisons between
+  webpages.
+
 Version 0.1.4
 -------------
 
