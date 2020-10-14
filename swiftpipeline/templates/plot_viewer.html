@@ -5,7 +5,7 @@
 {% block navigation %}
 {# Purely internal navigation links to take you up/down the page #}
 <ul class="nav">
-    {% for section in sections %}
+    {% for section in sections | sort(attribute="title") %}
     <li><a href="#{{ section.id }}">{{ section.title }}</a></li>
     {% endfor %}
 </ul>
