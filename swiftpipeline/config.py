@@ -5,7 +5,6 @@ Configuration object for the entire pipeline.
 import yaml
 from typing import List
 
-
 # Items to read directly from the yaml file with their defaults
 direct_read = {
     "auto_plotter_directory": None,
@@ -37,6 +36,8 @@ class Script(object):
     # Show on webpage; Defaults to True but used to disable webpage plotting
     # in the config file if required.
     show_on_webpage: bool
+    # additional arguments to be fed to a given script
+    additional_args: dict
 
     def __init__(self, script_dict: dict):
         """
@@ -49,7 +50,7 @@ class Script(object):
         self.section = script_dict.get("section", "")
         self.title = script_dict.get("title", "")
         self.show_on_webpage = script_dict.get("show_on_webpage", True)
-
+        self.additional_args = script_dict.get("additional_args", {})
         return
 
     def __str__(self):
@@ -131,4 +132,3 @@ class Config(object):
         self.scripts = [Script(script_dict=script_dict) for script_dict in raw_scripts]
 
         return
-

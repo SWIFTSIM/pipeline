@@ -12,4 +12,3 @@ def test_config(path="tests/test_config"):
     """
 
     config = Config(config_directory=path)
-

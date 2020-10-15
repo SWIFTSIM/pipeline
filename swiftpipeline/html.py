@@ -81,7 +81,7 @@ def get_if_present_int(dictionary, value: str, input_unit=None, output_unit=None
 
 class WebpageCreator(object):
     """
-    Creates webpages based on the information that is provided in 
+    Creates webpages based on the information that is provided in
     the plots metadata through the autoplotter and the additional
     plotting interface provided through the pipeline.
     """
@@ -164,7 +164,7 @@ class WebpageCreator(object):
 
         auto_plotter_metadata: AutoPlotterMetadata
             The complete instance of ``AutoPlotterMetadata`` after running the
-            ``velociraptor`` ``AutoPlotter``. 
+            ``velociraptor`` ``AutoPlotter``.
         """
 
         self.auto_plotter_metadata = auto_plotter_metadata

@@ -260,8 +260,8 @@ if __name__ == "__main__":
     # Now that we have auto_plotter_metadata we can use it to check if we have
     # inadvertently created multiple plots with the same filename.
     if args.debug:
-        figure_filenames = {plot.filename : 0 for plot in auto_plotter_metadata.plots}
-        
+        figure_filenames = {plot.filename: 0 for plot in auto_plotter_metadata.plots}
+
         for plot in auto_plotter_metadata.plots:
             figure_filenames[plot.filename] += 1
 
@@ -297,6 +297,8 @@ if __name__ == "__main__":
                 args.output,
                 "-C",
                 config.config_directory,
+                "-a",
+                *[a for pair in list(script.additional_args.items()) for a in pair],
             ]
         )
 

@@ -10,7 +10,7 @@ from swiftpipeline.config import Config
 class ScriptArgumentParser(object):
     """
     Script argument parser for ``swiftpipeline`` additional scripts.
-    
+
     They must conform to the following command-line api:
 
     + ``-s``: List of snapshots (not including directory)
@@ -20,6 +20,7 @@ class ScriptArgumentParser(object):
     + ``-n``: List of run names, optional, for use in legends.
     + ``-o``: Output directory for the figure.
     + ``-C``: Configuration directory (contains the ``config``.yml)
+    + ``-a``: Additional args for a given script
     """
 
     parser: ap.ArgumentParser
@@ -43,6 +44,9 @@ class ScriptArgumentParser(object):
 
     # Config object containing all relevant information.
     config: Config
+
+    # additional arguments for a given script
+    additional_args: List[Optional[(str)]]
 
     def __init__(self, description):
         """
@@ -115,6 +119,15 @@ class ScriptArgumentParser(object):
             required=True,
         )
 
+        self.parser.add_argument(
+            "-a",
+            "--additional-args",
+            help="Additional command line args for a given script",
+            type=str,
+            required=False,
+            nargs="*",
+        )
+
         return
 
     def __parse_arguments(self):
@@ -136,6 +149,10 @@ class ScriptArgumentParser(object):
         )
         self.output_directory = args.output_directory
         self.config_directory = args.config
+
+        # parse additional arguments
+        for i in range(len(args.additional_args) // 2):
+            setattr(self, args.additional_args[::2][i], args.additional_args[1::2][i])
 
         self.config = Config(config_directory=self.config_directory)
 
