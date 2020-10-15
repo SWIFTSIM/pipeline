@@ -1,5 +1,13 @@
 Changelog for the ``swiftpipeline`` repository.
 
+Version 0.1.6
+-------------
+
+Additional arguments update:
+
++ Scripts can now have additional arguments. See the example configuration
+  for an example.
+
 Version 0.1.5
 -------------
 
