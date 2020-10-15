@@ -7,10 +7,8 @@ import numpy as np
 
 from swiftsimio import load
 
-from unyt import mh, cm, Gyr
+from unyt import mh, cm
 from matplotlib.colors import LogNorm
-from matplotlib.cm import get_cmap
-from matplotlib.animation import FuncAnimation
 
 # Set the limits of the figure.
 density_bounds = [10 ** (-9.5), 1e6]  # in nh/cm^3
@@ -68,11 +66,7 @@ def setup_axes(number_of_simulations: int, quantity_type):
     vertical_number = int(np.ceil(number_of_simulations / horizontal_number))
 
     fig, ax = plt.subplots(
-        vertical_number,
-        horizontal_number,
-        squeeze=True,
-        sharex=True,
-        sharey=True,
+        vertical_number, horizontal_number, squeeze=True, sharex=True, sharey=True,
     )
 
     ax = np.array([ax]) if number_of_simulations == 1 else ax
@@ -153,11 +147,10 @@ def make_single_image(
 if __name__ == "__main__":
     from swiftpipeline.argumentparser import ScriptArgumentParser
 
-    arguments = ScriptArgumentParser(description="Basic density-temperature figure.")
-
-    # set additional argument defaults if not specified
-    if not hasattr(arguments, "quantity_type"):
-        arguments.quantity_type = "hydro"
+    arguments = ScriptArgumentParser(
+        description="Basic density-temperature figure.",
+        additional_arguments={"quantity_type": "hydro"},
+    )
 
     snapshot_filenames = [
         f"{directory}/{snapshot}"
