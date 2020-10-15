@@ -37,7 +37,7 @@ class Script(object):
     # in the config file if required.
     show_on_webpage: bool
     # additional arguments to be fed to a given script
-    additional_args: dict
+    additional_arguments: dict
 
     def __init__(self, script_dict: dict):
         """
@@ -50,7 +50,7 @@ class Script(object):
         self.section = script_dict.get("section", "")
         self.title = script_dict.get("title", "")
         self.show_on_webpage = script_dict.get("show_on_webpage", True)
-        self.additional_args = script_dict.get("additional_args", {})
+        self.additional_arguments = script_dict.get("additional_arguments", {})
         return
 
     def __str__(self):
@@ -61,6 +61,20 @@ class Script(object):
 
     def __repr__(self):
         return f"Script object describing the {self.filename} script."
+
+    @property
+    def additional_argument_list(self):
+        """
+        Gets a list of additional arguments, with --key, value ordering.
+        """
+
+        additional_arguments = []
+
+        for key, value in self.additional_arguments.items():
+            additional_arguments.append(f"--{key}")
+            additional_arguments.append(f"{value}")
+
+        return additional_arguments
 
 
 class Config(object):

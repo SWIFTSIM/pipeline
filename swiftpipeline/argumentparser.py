@@ -3,7 +3,7 @@ Argument parsing wrapper for the additional scripts.
 """
 
 import argparse as ap
-from typing import List, Union, Tuple, Optional
+from typing import List, Optional, Dict, Any
 from swiftpipeline.config import Config
 
 
@@ -45,15 +45,38 @@ class ScriptArgumentParser(object):
     # Config object containing all relevant information.
     config: Config
 
-    # additional arguments for a given script
-    additional_args: List[Optional[(str)]]
+    # Additional arguments, with the values being the defaults.
+    additional_arguments: Dict[str, Any]
 
-    def __init__(self, description):
+    def __init__(self, description: str, additional_arguments: Dict[str, Any] = None):
         """
         Initialises the argument parser object and parses the args, as they say.
+
+        Parameters
+        ----------
+
+        description: str
+            Description (for the command line) of this script. Shown when the
+            script is initialised with -h.
+
+        additional_arguments: dict
+            Dictionary containing any additional arguments. Has the structure
+            of the key being the command-line name (also used in the config.yml
+            file), and the value being the default. For example:
+
+            .. code-block:: python
+
+                additional_arguments = {
+                    "name": "No Name",
+                    "plot_total": 8,
+                }
         """
 
         self.description = description
+
+        self.additional_arguments = (
+            additional_arguments if additional_arguments is not None else dict()
+        )
 
         self.__setup_parser()
         self.__parse_arguments()
@@ -79,7 +102,10 @@ class ScriptArgumentParser(object):
         self.parser.add_argument(
             "-c",
             "--catalogues",
-            help="Catalogue list. Do not include directory. Example: catalogue_0000.properties",
+            help=(
+                "Catalogue list. Do not include directory. Example: "
+                "catalogue_0000.properties"
+            ),
             type=str,
             required=True,
             nargs="*",
@@ -128,6 +154,14 @@ class ScriptArgumentParser(object):
             nargs="*",
         )
 
+        for key, value in self.additional_arguments.items():
+            self.parser.add_argument(
+                f"--{key}",
+                help=f"Additional argument {key}. Default: {value}.",
+                default=value,
+                required=False,
+            )
+
         return
 
     def __parse_arguments(self):
@@ -150,9 +184,9 @@ class ScriptArgumentParser(object):
         self.output_directory = args.output_directory
         self.config_directory = args.config
 
-        # parse additional arguments
-        for i in range(len(args.additional_args) // 2):
-            setattr(self, args.additional_args[::2][i], args.additional_args[1::2][i])
+        # Parse any user-added arguments
+        for key, value in self.additional_arguments.items():
+            setattr(self, key, getattr(args, key, None))
 
         self.config = Config(config_directory=self.config_directory)
 
