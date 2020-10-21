@@ -178,6 +178,7 @@ class WebpageCreator(object):
                     filename=f"{plot.filename}.{auto_plotter_metadata.file_extension}",
                     title=plot.title,
                     caption=plot.caption,
+                    hash=hash(plot.caption + plot.title),
                 )
                 for plot in auto_plotter_metadata.metadata
                 if plot.section == section and plot.show_on_webpage
@@ -218,6 +219,7 @@ class WebpageCreator(object):
                     filename=script.output_file,
                     title=script.title,
                     caption=script.caption,
+                    hash=hash(script.caption + script.title),
                 )
                 for script in config.scripts
                 if script.section == section and script.show_on_webpage

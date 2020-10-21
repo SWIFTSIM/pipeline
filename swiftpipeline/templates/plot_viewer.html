@@ -31,13 +31,27 @@
     <div class="plot-container">
         {% for plot in section.plots %}
         <div class="plot">
-            <img src="{{ plot.filename }}" />
+            <a class="lightbox" href="#{{ plot.hash }}">
+                <img src="{{ plot.filename }}" />
+            </a>
             <h3>{{ plot.title }}</h3>
             <p>{{ plot.caption }}</p>
         </div>
         {% endfor %}
     </div>
 </div>
+{% endfor %}
+
+{# Create lightbox targets. #}
+{% for section in sections.values() | sort(attribute="title") %}
+    {% for plot in section.plots %}
+    <div class="lightbox-target" id="{{ plot.hash}}">
+        <img src="{{ plot.filename }}" />
+        <h3>{{ plot.title }}</h3>
+        <p>{{ plot.caption }}</p>
+        <a class="lightbox-close" href="#"></a>
+    </div>
+    {% endfor %}
 {% endfor %}
 {% endblock %}
 
