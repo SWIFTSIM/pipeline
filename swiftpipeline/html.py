@@ -111,7 +111,7 @@ class WebpageCreator(object):
             pipeline_version=pipeline_version,
             velociraptor_version=velociraptor_version,
             creation_date=strftime(r"%Y-%m-%d"),
-            sections=[],
+            sections={},
             runs=[],
         )
 
@@ -183,8 +183,14 @@ class WebpageCreator(object):
                 if plot.section == section and plot.show_on_webpage
             ]
 
-            self.variables["sections"].append(
-                dict(title=section, plots=plots, id=abs(hash(section)))
+            current_section_plots = (
+                self.variables["sections"].get(section, {"plots": []}).get("plots", [])
+            )
+
+            self.variables["sections"][section] = dict(
+                title=section,
+                plots=plots + current_section_plots,
+                id=abs(hash(section)),
             )
 
         return
@@ -217,8 +223,14 @@ class WebpageCreator(object):
                 if script.section == section and script.show_on_webpage
             ]
 
-            self.variables["sections"].append(
-                dict(title=section, plots=plots, id=abs(hash(section)))
+            current_section_plots = (
+                self.variables["sections"].get(section, {"plots": []}).get("plots", [])
+            )
+
+            self.variables["sections"][section] = dict(
+                title=section,
+                plots=plots + current_section_plots,
+                id=abs(hash(section)),
             )
 
         return
