@@ -1,5 +1,13 @@
 Changelog for the ``swiftpipeline`` repository.
 
+Version 0.1.8
+-------------
+
+Zooming update!
+
++ Adds ability to zoom in on plots on the web-page (just click on them!).
+  May not work with really old browsers.
+
 Version 0.1.7
 -------------
 
