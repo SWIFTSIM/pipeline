@@ -8,6 +8,7 @@ webpages that can represent whole cosmological simulations easily.
 
 import argparse as ap
 from typing import Union
+from pdb import set_trace
 
 parser = ap.ArgumentParser(
     prog="swift-pipeline",
@@ -159,12 +160,20 @@ if __name__ == "__main__":
         for input, snapshot in zip(args.input, args.snapshots)
     ]
     run_names = [data.metadata.run_name for data in snapshots]
-
+    
     observational_data_path = (
         f"{config.config_directory}/{config.observational_data_directory}/data"
     )
 
     if len(args.snapshots) == 1:
+
+        # Check that the output directory exists, create otherwise
+        if not os.path.isdir(args.output):
+            print(f"Output directory does not yet exist, creating it...")
+            os.makedirs(args.output)
+        else:
+            print(f"Using existing output directory {args.output}...")
+            
         # Run the pipeline based on the arguments if only a single simulation is
         # included and generate the metadata yaml file.
         print_if_debug(
