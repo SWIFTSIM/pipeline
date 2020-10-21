@@ -142,10 +142,6 @@ if __name__ == "__main__":
     config = Config(config_directory=args.config)
 
     print_if_debug(f"Matplotlib version: {__version__}.")
-    if config.matplotlib_stylesheet != "default":
-        stylesheet_path = f"{config.config_directory}/{config.matplotlib_stylesheet}"
-        print_if_debug(f"Applying matplotlib stylesheet at {stylesheet_path}.")
-        style.use(stylesheet_path)
 
     # Reverse so most recently modified is at the top.
     auto_plotter_configs = list(
@@ -167,6 +163,11 @@ if __name__ == "__main__":
 
     if len(args.snapshots) == 1:
 
+        if config.matplotlib_stylesheet_single != "default":
+            stylesheet_path = f"{config.config_directory}/{config.matplotlib_stylesheet_single}"
+            print_if_debug(f"Applying matplotlib stylesheet at {stylesheet_path}.")
+            style.use(stylesheet_path)
+        
         # Check that the output directory exists, create otherwise
         if not os.path.isdir(args.output):
             print(f"Output directory does not yet exist, creating it...")
@@ -207,7 +208,7 @@ if __name__ == "__main__":
         auto_plotter.link_catalogue(catalogue=catalogue)
 
         print_if_debug(f"Creating figures with extension .png in {args.output}.")
-        print_if_debug("Converting AutoPlotter.plots to a tqdm instance.")
+        #print_if_debug("Converting AutoPlotter.plots to a tqdm instance.")
 
         if args.debug:
             auto_plotter.plots = tqdm(auto_plotter.plots, desc="Creating figures")
@@ -224,6 +225,13 @@ if __name__ == "__main__":
         print_if_debug(f"Creating and writing metadata to {metadata_filename}")
         auto_plotter_metadata.write_metadata(metadata_filename)
     else:
+
+        if config.matplotlib_stylesheet_multi != "default":
+            stylesheet_path = f"{config.config_directory}/{config.matplotlib_stylesheet_multi}"
+            print_if_debug(f"Applying matplotlib stylesheet at {stylesheet_path}.")
+            style.use(stylesheet_path)
+
+
         # Need to generate our data again from the built-in yaml files.
         metadata_filenames = [
             f"{input}/{args.metadata}_{snapshot[-9:-5]}.yml"

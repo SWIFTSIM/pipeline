@@ -10,7 +10,8 @@ direct_read = {
     "auto_plotter_directory": None,
     "auto_plotter_registration": None,
     "observational_data_directory": None,
-    "matplotlib_stylesheet": "default",
+    "matplotlib_stylesheet_single": "default",
+    "matplotlib_stylesheet_multi": "default",    
     "description_template": None,
     "custom_css": None,
 }
