@@ -216,7 +216,7 @@ if __name__ == "__main__":
         
         try:
             auto_plotter_metadata.write_metadata(metadata_filename)
-        except (OSError, PermissionError):
+        except (OSError, PermissionError) as e:
             print_if_debug(f"Unable to save metadata to {metadata_filename}")
             pass
     else:
