@@ -37,6 +37,7 @@ class Script(object):
     # Show on webpage; Defaults to True but used to disable webpage plotting
     # in the config file if required.
     show_on_webpage: bool
+    use_for_comparison: bool
     # additional arguments to be fed to a given script
     additional_arguments: dict
 
@@ -51,6 +52,7 @@ class Script(object):
         self.section = script_dict.get("section", "")
         self.title = script_dict.get("title", "")
         self.show_on_webpage = script_dict.get("show_on_webpage", True)
+        self.use_for_comparison = script_dict.get("use_for_comparison", True)
         self.additional_arguments = script_dict.get("additional_arguments", {})
         return
 

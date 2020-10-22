@@ -100,6 +100,27 @@ parser.add_argument(
     ),
 )
 
+parser.add_argument(
+    "-x",
+    "--colours",
+    required=False,
+    default="00AEFF FF8C40 CC4314 5766B3 68246D 55E18E A646FF",
+    help=(
+        "Names of colours to use for individual runs."
+    ),
+    nargs="*",
+)
+
+parser.add_argument(
+    "-n",
+    "--run_names",
+    required=False,
+    help=(
+        "Names of runs to display. If not specified, the names "
+        "given in the simulations' parameter files will be used."
+    ),
+    nargs="*",
+)
 
 if __name__ == "__main__":
     # Parse our lovely arguments and pass them to the velociraptor library
@@ -140,7 +161,7 @@ if __name__ == "__main__":
         print_if_debug(f"{name}: {value}")
 
     config = Config(config_directory=args.config)
-
+    
     print_if_debug(f"Matplotlib version: {__version__}.")
 
     # Reverse so most recently modified is at the top.
@@ -155,8 +176,14 @@ if __name__ == "__main__":
         load_snapshot(f"{input}/{snapshot}")
         for input, snapshot in zip(args.input, args.snapshots)
     ]
-    run_names = [data.metadata.run_name for data in snapshots]
-    
+
+    if args.run_names is None:
+        run_names = [data.metadata.run_name for data in snapshots]
+    else:
+        run_names = args.run_names
+
+    script_colours=["C0"]
+        
     observational_data_path = (
         f"{config.config_directory}/{config.observational_data_directory}/data"
     )
@@ -231,6 +258,14 @@ if __name__ == "__main__":
             print_if_debug(f"Applying matplotlib stylesheet at {stylesheet_path}.")
             style.use(stylesheet_path)
 
+        script_colours = args.colours
+            
+        # Check that the output directory exists, create otherwise
+        if not os.path.isdir(args.output):
+            print(f"Output directory does not yet exist, creating it...")
+            os.makedirs(args.output)
+        else:
+            print(f"Using existing output directory {args.output}...")
 
         # Need to generate our data again from the built-in yaml files.
         metadata_filenames = [
@@ -268,6 +303,7 @@ if __name__ == "__main__":
                 recreate_single_figure(
                     plot=plot,
                     line_data=line_data,
+                    colours=args.colours,
                     output_directory=args.output,
                     file_type=PLOT_FILE_EXTENSION,
                 )
@@ -298,6 +334,11 @@ if __name__ == "__main__":
     for script in config.scripts:
         full_script_path = f"{config.config_directory}/{script.filename}"
 
+        if len(args.snapshots) > 1 and not script.use_for_comparison:
+            continue
+        
+        print(f"Running script {script}...")
+        
         run(
             [
                 "python3",
@@ -310,6 +351,8 @@ if __name__ == "__main__":
                 *args.input,
                 "-n",
                 *run_names,
+                "-x",
+                *script_colours,
                 "-o",
                 args.output,
                 "-C",

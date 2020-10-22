@@ -18,6 +18,7 @@ class ScriptArgumentParser(object):
     + ``-d``: List of input directories (both the snapshot and catalogue
               should be in there).
     + ``-n``: List of run names, optional, for use in legends.
+    + ``-x``: List of colours, optional.
     + ``-o``: Output directory for the figure.
     + ``-C``: Configuration directory (contains the ``config``.yml)
     + ``-a``: Additional args for a given script
@@ -34,6 +35,8 @@ class ScriptArgumentParser(object):
     directory_list: List[str]
     # List of representative names for the snapshots; may be a list of Nones
     name_list: List[Optional[str]]
+    # List of colours to use for each snapshot; may be a list of Nones
+    colour_list: List[Optional[str]]
     # Directory to output the figure to
     output_directory: str
     # Configuration directory containing config.yml.
@@ -130,6 +133,15 @@ class ScriptArgumentParser(object):
         )
 
         self.parser.add_argument(
+            "-x",
+            "--run-colours",
+            help="Colours to use for individual snapshots.",
+            type=str,
+            required=False,
+            nargs="*",
+        )
+
+        self.parser.add_argument(
             "-o",
             "--output-directory",
             help="Output directory for the produced figure.",
@@ -181,6 +193,11 @@ class ScriptArgumentParser(object):
             if args.run_names is not None
             else [None] * self.number_of_inputs
         )
+        self.colour_list = (
+            args.run_colours
+            if args.run_colours is not None
+            else [None] * self.number_of_inputs
+        )
         self.output_directory = args.output_directory
         self.config_directory = args.config
 
@@ -194,4 +211,4 @@ class ScriptArgumentParser(object):
 
     @property
     def stylesheet_location(self):
-        return f"{self.config_directory}/{self.config.matplotlib_stylesheet}"
+        return f"{self.config_directory}/{self.config.matplotlib_stylesheet_single}"
