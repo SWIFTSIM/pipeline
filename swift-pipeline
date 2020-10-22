@@ -213,7 +213,12 @@ if __name__ == "__main__":
             f"{args.input[0]}/{args.metadata}_{args.snapshots[0][-9:-5]}.yml"
         )
         print_if_debug(f"Creating and writing metadata to {metadata_filename}")
-        auto_plotter_metadata.write_metadata(metadata_filename)
+        
+        try:
+            auto_plotter_metadata.write_metadata(metadata_filename)
+        except (OSError, PermissionError):
+            print_if_debug(f"Unable to save metadata to {metadata_filename}")
+            pass
     else:
         # Need to generate our data again from the built-in yaml files.
         metadata_filenames = [
