@@ -38,6 +38,9 @@ class Script(object):
     show_on_webpage: bool
     # additional arguments to be fed to a given script
     additional_arguments: dict
+    # Use in the case where we have comparisons? The scripts may be disabled
+    # in comparison cases for performance reasons.
+    use_for_comparison: bool
 
     def __init__(self, script_dict: dict):
         """
@@ -51,6 +54,7 @@ class Script(object):
         self.title = script_dict.get("title", "")
         self.show_on_webpage = script_dict.get("show_on_webpage", True)
         self.additional_arguments = script_dict.get("additional_arguments", {})
+        self.use_for_comparison = script_dict.get("use_for_comparison", True)
         return
 
     def __str__(self):
@@ -85,7 +89,7 @@ class Config(object):
 
     # Raw config read directly from the file, before processing.
     raw_config: dict
-    scripts: List[Script]
+    raw_scripts: List[Script]
 
     # Set up the object.
     __slots__ = list(direct_read.keys()) + ["scripts", "config_directory", "raw_config"]
@@ -143,6 +147,23 @@ class Config(object):
         """
 
         raw_scripts = self.raw_config.get("scripts", [])
-        self.scripts = [Script(script_dict=script_dict) for script_dict in raw_scripts]
+        self.raw_scripts = [
+            Script(script_dict=script_dict) for script_dict in raw_scripts
+        ]
 
         return
+
+    @property
+    def scripts(self):
+        """
+        Gets all of the scripts defined in the parameter file.
+        """
+        return self.raw_scripts
+
+    @property
+    def comparison_scripts(self):
+        """
+        Gets the scripts only to be used in comparisons from the parameter
+        file.
+        """
+        return [script for script in self.raw_scripts if script.use_for_comparison]

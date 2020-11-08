@@ -1,5 +1,16 @@
 Changelog for the ``swiftpipeline`` repository.
 
+Version 0.2.0
+-------------
+
+Titles update!
+
++ Adds ability to overwrite run names in output, to enable easier comparisons.
++ Adds by default a redshift tag to each simulation name when comparing different
+  snapshots that have different redshifts.
++ Adds ability to disable scripts for comparisons (`use_for_comparison: false` in
+  yaml file).
+
 Version 0.1.8
 -------------
 

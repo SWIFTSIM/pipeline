@@ -196,7 +196,7 @@ class WebpageCreator(object):
 
         return
 
-    def add_config_metadata(self, config: Config):
+    def add_config_metadata(self, config: Config, is_comparison: bool = False):
         """
         Adds the section metadata from the additional plots
         defined under ``config.yml::scripts``.
@@ -206,12 +206,17 @@ class WebpageCreator(object):
 
         config: Config
             Configuration object from ``swift-pipeline``.
+
+        is_comparison: bool, optional
+            Is this webpage being created for a comparison? Default: False.
         """
 
         self.config = config
 
         # Unique sections
         sections = {script.section for script in config.scripts}
+
+        scripts_to_use = config.comparison_scripts if is_comparison else config.scripts
 
         for section in sections:
             plots = [
@@ -221,7 +226,7 @@ class WebpageCreator(object):
                     caption=script.caption,
                     hash=abs(hash(script.caption + script.title)),
                 )
-                for script in config.scripts
+                for script in scripts_to_use
                 if script.section == section and script.show_on_webpage
             ]
 

@@ -28,5 +28,6 @@ scripts:
     output_file: density_temperature.png
     section: Density-Temperature
     title: Density-Temperature
+    use_for_comparison: false
     additional_arguments:
       quantity_type: hydro

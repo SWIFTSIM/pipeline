@@ -99,6 +99,19 @@ parser.add_argument(
     ),
 )
 
+parser.add_argument(
+    "-n",
+    "--run-names",
+    required=False,
+    default=None,
+    nargs="*",
+    help=(
+        "Overwrite the names given to each run? If not present, the default names "
+        "from the snapshots are used, and in the case where there are multiple "
+        "redshifts, we append the redshift."
+    ),
+)
+
 
 if __name__ == "__main__":
     # Parse our lovely arguments and pass them to the velociraptor library
@@ -158,13 +171,32 @@ if __name__ == "__main__":
         load_snapshot(f"{input}/{snapshot}")
         for input, snapshot in zip(args.input, args.snapshots)
     ]
-    run_names = [data.metadata.run_name for data in snapshots]
+    if args.run_names is not None:
+        run_names = args.run_names
+        print_if_debug("Using custom run names:")
+        print_if_debug(" ".join(run_names))
+    else:
+        # First, check if the snapshots are all at the same redshift
+        redshifts = {data.metadata.redshift for data in snapshots}
+        if len(redshifts) == len(snapshots):
+            # All different redshifts!
+            run_names = [data.metadata.run_name for data in snapshots]
+        else:
+            # Need to append appropriate redshifts to names.
+            run_names = [
+                f"{data.metadata.run_name} (z={data.metadata.redshift:1.3f})"
+                for data in snapshots
+            ]
+        print_if_debug("Using default run names from snapshot:")
+        print_if_debug(" ".join(run_names))
 
     observational_data_path = (
         f"{config.config_directory}/{config.observational_data_directory}/data"
     )
 
-    if len(args.snapshots) == 1:
+    is_comparison = len(args.snapshots) > 1
+
+    if not is_comparison:
         # Run the pipeline based on the arguments if only a single simulation is
         # included and generate the metadata yaml file.
         print_if_debug(
@@ -213,7 +245,7 @@ if __name__ == "__main__":
             f"{args.input[0]}/{args.metadata}_{args.snapshots[0][-9:-5]}.yml"
         )
         print_if_debug(f"Creating and writing metadata to {metadata_filename}")
-        
+
         try:
             auto_plotter_metadata.write_metadata(metadata_filename)
         except (OSError, PermissionError) as e:
@@ -283,7 +315,9 @@ if __name__ == "__main__":
     if args.debug:
         config.scripts = tqdm(config.scripts, desc="Running Scripts")
 
-    for script in config.scripts:
+    scripts_to_use = config.comparison_scripts if is_comparison else config.scripts
+
+    for script in scripts_to_use:
         full_script_path = f"{config.config_directory}/{script.filename}"
 
         run(
@@ -310,7 +344,7 @@ if __name__ == "__main__":
     print_if_debug("Creating webpage.")
     webpage = WebpageCreator()
     webpage.add_auto_plotter_metadata(auto_plotter_metadata=auto_plotter_metadata)
-    webpage.add_config_metadata(config=config)
+    webpage.add_config_metadata(config=config, is_comparison=is_comparison)
     webpage.add_metadata(page_name=" | ".join(run_names))
     webpage.add_run_metadata(config=config, snapshots=snapshots)
     webpage.render_webpage()
