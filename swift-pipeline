@@ -194,7 +194,9 @@ if __name__ == "__main__":
         f"{config.config_directory}/{config.observational_data_directory}/data"
     )
 
-    if len(args.snapshots) == 1:
+    is_comparison = len(args.snapshots) > 1
+
+    if not is_comparison:
         # Run the pipeline based on the arguments if only a single simulation is
         # included and generate the metadata yaml file.
         print_if_debug(
@@ -313,7 +315,9 @@ if __name__ == "__main__":
     if args.debug:
         config.scripts = tqdm(config.scripts, desc="Running Scripts")
 
-    for script in config.scripts:
+    scripts_to_use = config.comparison_scripts if is_comparison else config.scripts
+
+    for script in scripts_to_use:
         full_script_path = f"{config.config_directory}/{script.filename}"
 
         run(
@@ -340,7 +344,7 @@ if __name__ == "__main__":
     print_if_debug("Creating webpage.")
     webpage = WebpageCreator()
     webpage.add_auto_plotter_metadata(auto_plotter_metadata=auto_plotter_metadata)
-    webpage.add_config_metadata(config=config)
+    webpage.add_config_metadata(config=config, is_comparison=is_comparison)
     webpage.add_metadata(page_name=" | ".join(run_names))
     webpage.add_run_metadata(config=config, snapshots=snapshots)
     webpage.render_webpage()
