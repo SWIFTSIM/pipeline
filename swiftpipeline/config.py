@@ -92,7 +92,11 @@ class Config(object):
     raw_scripts: List[Script]
 
     # Set up the object.
-    __slots__ = list(direct_read.keys()) + ["scripts", "config_directory", "raw_config"]
+    __slots__ = list(direct_read.keys()) + [
+        "raw_scripts",
+        "config_directory",
+        "raw_config",
+    ]
 
     def __init__(self, config_directory: str):
         """
