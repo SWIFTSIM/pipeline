@@ -3,3 +3,11 @@ env/*
 *egg-info
 dist/*
 build/*
+
+# Data files
+*.hdf5
+*.properties
+data_0000.yml
+metadata_0000.yml
+*.png
+test_output/*
