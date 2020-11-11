@@ -311,11 +311,10 @@ if __name__ == "__main__":
                 )
 
     # Now move onto using the ``config`` to generate plots from the actual data.
+    scripts_to_use = config.comparison_scripts if is_comparison else config.scripts
 
     if args.debug:
-        config.scripts = tqdm(config.scripts, desc="Running Scripts")
-
-    scripts_to_use = config.comparison_scripts if is_comparison else config.scripts
+        scripts_to_use = tqdm(scripts_to_use, desc="Running Scripts")
 
     for script in scripts_to_use:
         full_script_path = f"{config.config_directory}/{script.filename}"
