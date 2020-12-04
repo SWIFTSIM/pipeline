@@ -178,9 +178,11 @@ if __name__ == "__main__":
     else:
         # First, check if the snapshots are all at the same redshift
         redshifts = {data.metadata.redshift for data in snapshots}
-        if len(redshifts) == len(snapshots):
-            # All different redshifts!
+        # If the size of the set is one, then all redshifts are the same
+        if len(redshifts) == 1:
+            # All redshifts are the same! No need to modify runs' names
             run_names = [data.metadata.run_name for data in snapshots]
+        # If the size of the set > 1, then at least two runs have different redshifts
         else:
             # Need to append appropriate redshifts to names.
             run_names = [
