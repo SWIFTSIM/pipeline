@@ -1,5 +1,13 @@
 Changelog for the ``swiftpipeline`` repository.
 
+Version 0.3.0
+-------------
+
+Image pipeline update!
+
++ Adds ability to create images with ``swift-image``
++ Adds new configuration functionality for ``swift-image``
+
 Version 0.2.0
 -------------
 

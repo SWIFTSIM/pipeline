@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_name }}{% endblock %}
+
+{% block content %}
+
+<div class="thumbnails">
+    {% for halo in haloes %}
+    <div class="thumbnail">
+        <a href="halo_{{ halo.unique_id }}/index.html">
+            <img src="halo_{{ halo.unique_id }}/thumbnail.{{ config.image_format }}" />
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

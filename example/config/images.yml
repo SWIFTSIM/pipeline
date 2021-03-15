@@ -1,0 +1,93 @@
+# Example configuration for the image script, with defaults.
+
+# Resolution in pixels for each "real" image.
+resolution: 1024
+
+# Output image format. jpg is recommended as lossy compression really helps
+# with lots of images.
+image_format: jpg
+
+# Whether or not to recalculate the smoothing lengths for stellar particles
+recalculate_stellar_smoothing_lengths: true
+
+# Should dark matter have smoothing lengths generated? If not,
+# you will effectively get a 2D histogram.
+calculate_dark_matter_smoothing_lengths: true
+
+# Only make images of centrals?
+centrals_only: true
+
+# Minimal halo mass to make images above (with unyt unit)
+minimum_halo_mass: [1e9, Solar_Mass]
+
+# Whether to cut down the number of images to a fixed number per bin.
+use_binned_image_selection: true
+
+# Bin width (in dex) for halo selection
+bin_width_in_dex: 0.5
+
+# Number of haloes to (randomly) visualise within a given bin
+haloes_to_visualise_per_bin: 10
+
+# Which one of the images below should be the thumbnail?
+thumbnail_image: temperature_neighbourhood
+
+# List of images to create
+# There are three possible values for the radius units:
+# + stellar_half_mass, this is r_50, 100 kpc for the stars.
+# + r_200_crit, this is r200,crit for hat halo
+# + Anything else is interpreted as a physical radius aperture.
+# For each of these, three projections will be made - the original,
+# along the z axis, a face-on, and an edge-on (the latter are based
+# on the angular momentum vector of the stars) unless otherwise
+# specified (probably a waste of time to do this for DM).
+images:
+  temperature_neighbourhood:
+    name: Projected Temperature (Close)
+    radius: [5, r_200_crit]
+    particle_type: "gas"
+    visualise: "temperatures"
+    cmap: "twilight"
+    vmin: [1e3, K]
+    vmax: [1e7, K]
+    fill_below: [1e4, K] # Useful should you wish to offset the cmap norm.
+    output_units: K
+    text_color: white
+    face_on: false
+    edge_on: false
+  temperature_close:
+    name: Projected Temperature (Close)
+    radius: [10, stellar_half_mass]
+    particle_type: "gas"
+    visualise: "temperatures"
+    cmap: "twilight"
+    vmin: [1e3, K]
+    vmax: [1e7, K]
+    fill_below: [1e4, K] # Useful should you wish to offset the cmap norm.
+    output_units: K
+    text_color: white
+  dark_matter_neighbourhood:
+    name: Dark Matter (local neighbourhood)
+    radius: [10, r_200_crit]
+    particle_type: "dark_matter"
+    visualise: "projected_densities"
+    cmap: "plasma"
+    output_units: Solar_Mass / kpc**2
+    vmin: [1e4, Solar_Mass / kpc**2]
+    vmax: [1e9, Solar_Mass / kpc**2]
+    fill_below: [1e3, Solar_Mass / kpc**2]
+    face_on: false
+    edge_on: false
+    text_color: white
+  gas_density_close:
+    name: Gas Density (400 kpc)
+    radius: [400, kpc]
+    particle_type: "gas"
+    visualise: "projected_densities"
+    cmap: "viridis"
+    output_units: Solar_Mass / kpc**2
+    vmin: [1e4, Solar_Mass / kpc**2]
+    vmax: [1e9, Solar_Mass / kpc**2]
+    fill_below: [1e1, Solar_Mass / kpc**2]
+    text_color: white
+

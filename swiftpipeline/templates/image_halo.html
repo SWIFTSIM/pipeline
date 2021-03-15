@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_name }}{% endblock %}
+
+{% block navigation %}
+{# Purely internal navigation links to take you up/down the page #}
+<ul class="nav">
+    {% for image in images | sort(attribute="base_name") %}
+    <li><a href="#{{ image.base_name }}">{{ image.name }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="section run-descriptions">
+    <h1>Halo {{halo.unique_id}}</h1>
+    <div class="run">
+        <h3>Halo Properties</h3>
+        <ul>
+            <li>$M_{\rm 200, crit}$ = {{ halo.mass_200_crit.to("Solar_Mass") | format_number}}</li>
+            <li>$R_{\rm 200, crit}$ = {{ halo.radius_200_crit.to("kpc") | format_number }}</li>
+            <li>$M_{*, 100}$ = {{ halo.mass_100_kpc_star.to("Solar_Mass") | format_number }}</li>
+            <li>$R_{50, *, 100}$ = {{ halo.radius_100_kpc_star.to("kpc") | format_number }}</li>
+            <li>Position: {{ halo.position.to("Mpc")[0] | format_number }}, {{ halo.position.to("Mpc")[1] |
+                format_number
+                }}, {{ halo.position.to("Mpc")[2] | format_number }}</li>
+        </ul>
+    </div>
+</div>
+
+{# Show off our images! #}
+{% for image in images | sort(attribute="base_name") %}
+<div class="section" id="{{ image.base_name }}">
+    <h1>{{ image.name }}</h1>
+    <div class="plot-container">
+        {% for projection in ["default", "face_on", "edge_on"] %}
+        {% if image[projection] %}
+        <div class="plot">
+            <a class="lightbox" href="#{{ image.base_name }}{{ projection }}LB">
+                <img src="{{ image.base_name }}_{{projection}}.{{ config.image_format }}" class="border" />
+            </a>
+            <h3>{{ image.name }}</h3>
+            <p>{{ projection | camel_to_title }} projection.</p>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+
+{# Create lightbox targets. #}
+{% for image in images | sort(attribute="base_name") %}
+{% for projection in ["default", "face_on", "edge_on"] %}
+{% if image[projection] %}
+<div class="lightbox-target lightbox-target-wide" id="{{ image.base_name }}{{ projection }}LB">
+    <img src="{{ image.base_name }}_{{projection}}.{{ config.image_format }}" />
+    <a class="lightbox-close" href="#{{ image.base_name }}"></a>
+</div>
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endblock %}
+
+{% block footer %}
+<p>
+    Created with version {{ pipeline_version }} of the pipeline
+    with version {{ velociraptor_version }} of the velociraptor
+    python library on {{ creation_date }}.
+</p>
+{% endblock %}
