@@ -250,6 +250,11 @@ def create_scatter(
 
     particle_data = getattr(snapshot, image.particle_type, "gas")
 
+    if hasattr(particle_data, "smoothing_lengths"):
+        backend = "fast"
+    else:
+        backend = "histogram"
+
     common_attributes = dict(
         data=particle_data,
         boxsize=snapshot.metadata.boxsize,
@@ -259,6 +264,7 @@ def create_scatter(
         rotation_matrix=rotation_matrix,
         rotation_center=rotation_center,
         parallel=False,
+        backend=backend,
     )
 
     mass_image = project_pixel_grid(project="masses", **common_attributes)
