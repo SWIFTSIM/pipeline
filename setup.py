@@ -23,11 +23,11 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
+        "astropy",
         "swiftsimio",
         "matplotlib",
         "jinja2",
         "velociraptor",
-        "astropy",
         "unyt",
         "tqdm",
         "p_tqdm",
