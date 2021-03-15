@@ -76,6 +76,15 @@ parser.add_argument(
     help="Run in debug mode if this flag is present. Default: no.",
 )
 
+parser.add_argument(
+    "-p",
+    "--parallel",
+    required=False,
+    default=False,
+    action="store_true",
+    help="Run in parallel if flag is present. May not work on all systems. Default: no.",
+)
+
 if __name__ == "__main__":
     # Parse our lovely arguments and pass them to the velociraptor library
     from matplotlib import __version__
@@ -126,6 +135,8 @@ if __name__ == "__main__":
         output_path=output_path,
         snapshot_path=snapshot_path,
         catalogue_path=catalogue_path,
+        parallel=args.parallel,
+        debug=args.debug,
     )
 
     print_if_debug("Done.")

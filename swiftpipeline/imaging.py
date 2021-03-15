@@ -8,6 +8,9 @@ from swiftpipeline.imageconfig import ImageConfig, Image
 import matplotlib.pyplot as plt
 import numpy as np
 
+from tqdm import tqdm
+from p_tqdm import p_map
+
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib.patches import Circle
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -506,7 +509,9 @@ def save_thumbnail_from_scatter(
 
     output_filename = output_path / f"thumbnail.{config.image_format}"
 
-    fig, ax = plt.subplots(figsize=[1] * 2, dpi=128)
+    fig, ax = plt.subplots(
+        figsize=[1] * 2, dpi=128, constrained_layout=False, tight_layout=False
+    )
 
     fig.subplots_adjust(0, 0, 1, 1, 0, 0)
     ax.axis("off")
@@ -677,6 +682,8 @@ def create_all_images(
     output_path: Path,
     snapshot_path: Path,
     catalogue_path: Path,
+    parallel: bool = False,
+    debug: bool = False,
 ):
     """
     Create all images, given a config and a set of snapshots
@@ -699,17 +706,29 @@ def create_all_images(
 
     catalogue_path: Path, str
         Path to the catalogue (``/path/to/halo_0000.properties``).
+
+    parallel: bool, optional
+        Whether or not to create all images in parallel with each other
+        (uses p_tqdm).
+
+    debug: bool, optional
+        Whether or not to print out the progress of the image creation
     """
 
     haloes = haloes_to_visualise(config=config, catalogue_path=catalogue_path)
 
-    for halo in haloes:
+    def packed_vis(halo):
         visualise_halo(
             output_path=output_path,
             snapshot_path=snapshot_path,
             config=config,
             halo=halo,
         )
+
+    if parallel:
+        p_map(packed_vis, haloes, disable=not debug)
+    else:
+        list(map(packed_vis, tqdm(haloes, disable=not debug)))
 
     build_webpage(config=config, haloes=haloes, output_path=output_path)
 
