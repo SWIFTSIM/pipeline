@@ -29,6 +29,8 @@ setuptools.setup(
         "velociraptor",
         "astropy",
         "unyt",
+        "tqdm",
+        "p_tqdm",
     ],
     scripts=["swift-pipeline", "swift-image"],
     include_package_data=True,
