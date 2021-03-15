@@ -113,6 +113,7 @@ def haloes_to_visualise(config: ImageConfig, catalogue_path: Path) -> List[Halo]
     catalogue = load_catalogue(catalogue_path)
 
     mass_200crit = catalogue.masses.mass_200crit
+    a = catalogue.a
 
     mask = mass_200crit > config.minimum_halo_mass
 
@@ -172,14 +173,16 @@ def haloes_to_visualise(config: ImageConfig, catalogue_path: Path) -> List[Halo]
         haloes.append(
             Halo(
                 mass_200_crit=catalogue.masses.mass_200crit[unique_id],
-                radius_200_crit=catalogue.radii.r_200crit[unique_id],
+                radius_200_crit=catalogue.radii.r_200crit[unique_id] / a,
                 mass_100_kpc_star=catalogue.apertures.mass_star_100_kpc[unique_id],
                 radius_100_kpc_star=catalogue.apertures.rhalfmass_star_100_kpc[
                     unique_id
-                ],
+                ]
+                / a,
                 unique_id=unique_id,
                 position=[
-                    getattr(catalogue.positions, f"{c}cmbp")[unique_id] for c in "xyz"
+                    getattr(catalogue.positions, f"{c}cmbp")[unique_id] / a
+                    for c in "xyz"
                 ],
                 L=[
                     getattr(catalogue.angular_momentum, f"l{c}_star")[unique_id]
