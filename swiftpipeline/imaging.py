@@ -242,19 +242,19 @@ def create_scatter(
         stellar_half_mass=halo.radius_100_kpc_star, r_200_crit=halo.radius_200_crit
     )
 
+    particle_data = getattr(snapshot, image.particle_type, "gas")
+
     region = region_given_r(radius)
 
     rotation_center = None
     rotation_matrix = None
 
     if projection == Projection.EDGE_ON:
-        rotation_center = halo.position
+        rotation_center = halo.position.to(particle_data.coordinates.units)
         rotation_matrix = rotation_matrix_from_vector(halo.L.v, "y")
     elif projection == Projection.FACE_ON:
-        rotation_center = halo.position
+        rotation_center = halo.position.to(particle_data.coordinates.units)
         rotation_matrix = rotation_matrix_from_vector(halo.L.v, "z")
-
-    particle_data = getattr(snapshot, image.particle_type, "gas")
 
     if hasattr(particle_data, "smoothing_lengths"):
         backend = "fast"
