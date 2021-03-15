@@ -13,9 +13,9 @@ def test_basic():
 
     creator = WebpageCreator()
     plots = [dict(title="Test Plot", caption="Test Caption", filename="test.png")]
-    creator.variables["sections"] = [
-        dict(title="Test Section", id=abs(hash("Test Section")), plots=plots)
-    ]
+    creator.variables["sections"] = {
+        "A": dict(title="Test Section", id=abs(hash("Test Section")), plots=plots)
+    }
     creator.add_metadata(page_name="Test Page")
     creator.render_webpage()
 
