@@ -53,6 +53,8 @@ images:
     fill_below: [1e4, K] # Useful should you wish to offset the cmap norm.
     output_units: K
     text_color: white
+    face_on: false
+    edge_on: false
   temperature_close:
     name: Projected Temperature (Close)
     radius: [10, stellar_half_mass]
@@ -87,7 +89,5 @@ images:
     vmin: [1e4, Solar_Mass / kpc**2]
     vmax: [1e9, Solar_Mass / kpc**2]
     fill_below: [1e1, Solar_Mass / kpc**2]
-    face_on: false
-    edge_on: false
     text_color: white
 
