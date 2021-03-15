@@ -357,7 +357,10 @@ def save_figure_from_scatter(
     )
 
     fig, ax = plt.subplots(
-        figsize=[config.figure_size] * 2, dpi=config.resolution // config.figure_size
+        figsize=[config.figure_size] * 2,
+        dpi=config.resolution // config.figure_size,
+        constrained_layout=False,
+        tight_layout=False,
     )
 
     fig.subplots_adjust(0, 0, 1, 1, 0, 0)
