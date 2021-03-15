@@ -165,11 +165,14 @@ def haloes_to_visualise(config: ImageConfig, catalogue_path: Path) -> List[Halo]
         # Modify our original mask with our new changes
         mask[mask] = mass_mask
 
-    # Now build the list of halo objects from valid objects.
+    # Now build the list of halo objects from valid objects, starting
+    # with the most massive.
 
     haloes = []
+    halo_id_order = np.argsort(mass_200crit[mask])[::-1]
+    halo_ids_valid = np.arange(len(mass_200crit))[mask][halo_id_order]
 
-    for unique_id in np.arange(len(mass_200crit))[mask]:
+    for unique_id in halo_ids_valid:
         haloes.append(
             Halo(
                 mass_200_crit=catalogue.masses.mass_200crit[unique_id],
