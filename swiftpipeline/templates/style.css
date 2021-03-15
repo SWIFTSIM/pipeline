@@ -299,5 +299,29 @@ a.lightbox-close:after {
     top: 0px;
     z-index: 1024;
 }
+
+.lightbox-target-wide:target img {
+    max-height: 95%;
+    max-width: 95%;
+    z-index: 1024;
+}
+
+/* Image specific styles */
+
+.thumbnails {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+}
+
+.thumbnail {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+}
+
+.border {
+    border: 1px solid black;
+}
     
 {% endraw %}

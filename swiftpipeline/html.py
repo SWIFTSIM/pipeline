@@ -13,6 +13,7 @@ from velociraptor.autoplotter.metadata import AutoPlotterMetadata
 from jinja2 import Environment, PackageLoader, FileSystemLoader, select_autoescape
 from time import strftime
 from typing import List
+from pathlib import Path
 
 import unyt
 
@@ -40,7 +41,7 @@ def format_number(number):
 def get_if_present_float(dictionary, value: str, input_unit=None, output_unit=None):
     """
     A replacement for .get() that also formats the number if present.
-    
+
     Assumes data should be a float.
     """
 
@@ -61,7 +62,7 @@ def get_if_present_float(dictionary, value: str, input_unit=None, output_unit=No
 def get_if_present_int(dictionary, value: str, input_unit=None, output_unit=None):
     """
     A replacement for .get() that also formats the number if present.
-    
+
     Assumes data should be an integer.
     """
 
@@ -77,6 +78,10 @@ def get_if_present_int(dictionary, value: str, input_unit=None, output_unit=None
         return format_number(value)
     except KeyError:
         return ""
+
+
+def camel_to_title(string):
+    return string.title().replace("_", " ")
 
 
 class WebpageCreator(object):
@@ -260,6 +265,7 @@ class WebpageCreator(object):
         environment = Environment(loader=loader)
 
         environment.filters["format_number"] = format_number
+        environment.filters["camel_to_title"] = camel_to_title
         environment.filters["get_if_present_float"] = get_if_present_float
         environment.filters["get_if_present_int"] = get_if_present_int
 
@@ -293,3 +299,93 @@ class WebpageCreator(object):
 
         with open(filename, "w") as handle:
             handle.write(self.html)
+
+
+class ImageWebpageCreator(object):
+    """
+    Creates the webpages for the imaging system.
+    """
+
+    environment: Environment
+    loader: PackageLoader
+
+    variables: dict
+    html: str
+
+    config: Config
+
+    def __init__(self, haloes, config):
+        """
+        Sets up the ``jinja`` templating system.
+        """
+
+        self.loader = PackageLoader("swiftpipeline", "templates")
+        self.environment = Environment(
+            loader=self.loader, autoescape=select_autoescape(["js"])
+        )
+
+        self.environment.filters["format_number"] = format_number
+        self.environment.filters["camel_to_title"] = camel_to_title
+        self.environment.filters["get_if_present_float"] = get_if_present_float
+        self.environment.filters["get_if_present_int"] = get_if_present_int
+
+        # Initialise empty variables dictionary, with the versions of
+        # this package and the velociraptor package used.
+        self.variables = dict(
+            pipeline_version=pipeline_version,
+            velociraptor_version=velociraptor_version,
+            creation_date=strftime(r"%Y-%m-%d"),
+            haloes=haloes,
+            config=config,
+            images=config.images,
+        )
+
+        return
+
+    def render_gallery(self) -> str:
+        """
+        Renders a webpage based on the internal variables stored in
+        the ``variables`` dictionary.
+
+        Parameters
+        ----------
+
+        template: str
+            The name of the template that you wish to use. Defaults to
+            "plot_viewer.html".
+
+        Returns
+        -------
+
+        html: str
+            The resulting HTML. This is also stored in ``.html``.
+        """
+
+        self.html = self.environment.get_template(
+            "image_gallery.html", parent="base.html"
+        ).render(page_name="Image Gallery", **self.variables)
+
+        return self.html
+
+    def render_single_halo(self, halo) -> str:
+        return self.environment.get_template(
+            "image_halo.html", parent="base.html"
+        ).render(page_name=f"Halo {halo.unique_id}", halo=halo, **self.variables)
+
+    def save_html(self, output_path: Path):
+        """
+        Saves all the relevant HTML, to the output path.
+        """
+
+        gallery_html = self.render_gallery()
+        gallery_filename = Path(output_path) / "index.html"
+
+        with open(gallery_filename, "w") as handle:
+            handle.write(gallery_html)
+
+        for halo in self.variables["haloes"]:
+            halo_html = self.render_single_halo(halo)
+            halo_filename = Path(output_path) / f"halo_{halo.unique_id}/index.html"
+
+            with open(halo_filename, "w") as handle:
+                handle.write(halo_html)
