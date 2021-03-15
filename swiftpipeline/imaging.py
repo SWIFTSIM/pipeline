@@ -252,12 +252,16 @@ def create_scatter(
     rotation_center = None
     rotation_matrix = None
 
-    if projection == Projection.EDGE_ON:
-        rotation_center = halo.position.to(particle_data.coordinates.units)
-        rotation_matrix = rotation_matrix_from_vector(halo.L.v, "y")
-    elif projection == Projection.FACE_ON:
-        rotation_center = halo.position.to(particle_data.coordinates.units)
-        rotation_matrix = rotation_matrix_from_vector(halo.L.v, "z")
+    # If the L vector is poorly constrained this will complain,
+    # but we don't really care.
+    with np.testing.suppress_warnings() as sup:
+        sup.filter(RuntimeWarning)
+        if projection == Projection.EDGE_ON:
+            rotation_center = halo.position.to(particle_data.coordinates.units)
+            rotation_matrix = rotation_matrix_from_vector(halo.L.v, "y")
+        elif projection == Projection.FACE_ON:
+            rotation_center = halo.position.to(particle_data.coordinates.units)
+            rotation_matrix = rotation_matrix_from_vector(halo.L.v, "z")
 
     if hasattr(particle_data, "smoothing_lengths"):
         backend = "fast"
