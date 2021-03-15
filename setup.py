@@ -30,6 +30,6 @@ setuptools.setup(
         "astropy",
         "unyt",
     ],
-    scripts=["swift-pipeline"],
+    scripts=["swift-pipeline", "swift-image"],
     include_package_data=True,
 )
