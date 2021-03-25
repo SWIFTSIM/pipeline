@@ -175,7 +175,11 @@ class WebpageCreator(object):
         self.auto_plotter_metadata = auto_plotter_metadata
 
         # Unique sections
-        sections = {plot.section for plot in auto_plotter_metadata.metadata}
+        sections = {
+            plot.section
+            for plot in auto_plotter_metadata.metadata
+            if plot.show_on_webpage
+        }
 
         for section in sections:
             plots = [
@@ -219,7 +223,9 @@ class WebpageCreator(object):
         self.config = config
 
         # Unique sections
-        sections = {script.section for script in config.scripts}
+        sections = {
+            script.section for script in config.scripts if script.show_on_webpage
+        }
 
         scripts_to_use = config.comparison_scripts if is_comparison else config.scripts
 
