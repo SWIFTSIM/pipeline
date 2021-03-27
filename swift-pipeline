@@ -181,12 +181,12 @@ if __name__ == "__main__":
             col_width = max(len(name) for name in script_runtimes.keys()) + 3
 
             # Set the width of the columns
-            first_item_width, second_item_width, third_item_width = col_width, 20, 20
+            first_item_width, second_item_width, third_item_width = col_width, 20, 10
 
             # Make zeroth row
             first_item = "Script name".ljust(first_item_width)
             second_item = "Run time (s)".ljust(second_item_width)
-            third_item = "Fraction of total".ljust(third_item_width)
+            third_item = "Fraction".ljust(third_item_width)
 
             # Print out table header including the zeroth row
             print()
