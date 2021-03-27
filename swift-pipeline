@@ -151,21 +151,31 @@ if __name__ == "__main__":
         # Create a key-value pair for the total runtime of the scripts
         script_runtimes["Total Run Time"] = 0.0  # sec
 
-        # Create runtime wrapper to record wall-clock times during function calls
+        # Create runtime wrapper to record wall-clock times spent in the calls of
+        # function 'subprocess.run'
         def runtime_wrapper(f):
             @wraps(f)
             def wrap(*args, **kwargs):
 
-                # Record times before and after the function call
+                # We assume the wrapper is only used on subprocess.run whose first
+                # argument is a list [python3, path to script, {script params}]. We can
+                # thus fetch the script name as done below
+                try:
+                    script_name = args[0][1].split("/")[-1]
+                    print(script_name)
+                except (AttributeError, TypeError):
+                    script_name = "Other calls"
+
+                # Record the time difference before and after the call of subprocess.run
                 time_start = time()
                 output = f(*args, **kwargs)
                 time_end = time()
 
                 # Save the elapsed time before and after the call of f into a dict
-                script_runtimes[script.filename] = time_end - time_start
+                script_runtimes[script_name] = time_end - time_start
 
                 # Update the total run time
-                script_runtimes["Total Run Time"] += script_runtimes[script.filename]
+                script_runtimes["Total Run Time"] += script_runtimes[script_name]
 
                 return output
 
