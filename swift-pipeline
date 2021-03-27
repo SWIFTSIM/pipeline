@@ -162,7 +162,6 @@ if __name__ == "__main__":
                 # thus fetch the script name as done below
                 try:
                     script_name = args[0][1].split("/")[-1]
-                    print(script_name)
                 except (AttributeError, TypeError):
                     script_name = "Other calls"
 
