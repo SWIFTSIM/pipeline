@@ -148,9 +148,6 @@ if __name__ == "__main__":
         # Create dict for recording wall-clock time spent while running scripts
         script_runtimes = {}
 
-        # Create a key-value pair for the total runtime of the scripts
-        script_runtimes["Total Run Time"] = 0.0  # sec
-
         # Create runtime wrapper to record wall-clock times spent in the calls of
         # function 'subprocess.run'
         def runtime_wrapper(f):
@@ -173,9 +170,6 @@ if __name__ == "__main__":
                 # Save the elapsed time before and after the call of f into a dict
                 script_runtimes[script_name] = time_end - time_start
 
-                # Update the total run time
-                script_runtimes["Total Run Time"] += script_runtimes[script_name]
-
                 return output
 
             return wrap
@@ -184,7 +178,17 @@ if __name__ == "__main__":
         run = runtime_wrapper(run)
 
         # Create a function to print out script runtime statistics as a table
-        def print_script_runtime_statistics():
+        def print_script_runtime_statistics(script_runtimes):
+
+            # Init variable to compute the sum of scripts' runtimes
+            total_runtime = 0.0 # sec
+
+            # Add runtimes of all scripts to the sum
+            for script_runtime in script_runtimes.values():
+                total_runtime += script_runtime
+
+            # Create a key-value pair for the total runtime of the scripts
+            script_runtimes["Total Runtime"] = total_runtime
 
             # Compute the width of first column in the table (add 3 for padding)
             col_width = max(len(name) for name in script_runtimes.keys()) + 3
@@ -204,13 +208,13 @@ if __name__ == "__main__":
             print("-" * (first_item_width + second_item_width + third_item_width))
 
             # Create and print out the remaining rows
-            for script_name, script_time in script_runtimes.items():
+            for script_name, script_runtime in script_runtimes.items():
 
-                # Fraction of the total run time per script
-                run_time_fraction = script_time / script_runtimes["Total Run Time"]
+                # Fraction of the total runtime per script
+                run_time_fraction = script_runtime / script_runtimes["Total Runtime"]
 
                 first_item = f"{script_name}".ljust(first_item_width)
-                second_item = f"{script_time:.4f}".ljust(second_item_width)
+                second_item = f"{script_runtime:.4f}".ljust(second_item_width)
                 third_item = f"{run_time_fraction:.6f}".ljust(third_item_width)
 
                 # Print row
@@ -421,7 +425,7 @@ if __name__ == "__main__":
 
     # Print out script runtime statistics
     if args.debug:
-        print_script_runtime_statistics()
+        print_script_runtime_statistics(script_runtimes=script_runtimes)
 
     # Create the webpage`
     print_if_debug("Creating webpage.")
