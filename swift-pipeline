@@ -181,7 +181,7 @@ if __name__ == "__main__":
         def print_script_runtime_statistics(script_runtimes):
 
             # Init variable to compute the sum of scripts' runtimes
-            total_runtime = 0.0 # sec
+            total_runtime = 0.0  # sec
 
             # Add runtimes of all scripts to the sum
             for script_runtime in script_runtimes.values():
