@@ -142,6 +142,87 @@ if __name__ == "__main__":
     # Set up some basic debugging things
     if args.debug:
         from tqdm import tqdm
+        from time import time
+        from functools import wraps
+
+        # Create dict for recording wall-clock time spent while running scripts
+        script_runtimes = {}
+
+        # Create runtime wrapper to record wall-clock times spent in the calls of
+        # function 'subprocess.run'
+        def runtime_wrapper(f):
+            @wraps(f)
+            def wrap(*args, **kwargs):
+
+                # We assume the wrapper is only used on subprocess.run whose first
+                # argument is a list [python3, path to script, {script params}]. We can
+                # thus fetch the script name as done below
+                try:
+                    script_name = args[0][1].split("/")[-1]
+                except (AttributeError, TypeError):
+                    script_name = "Other calls"
+
+                # Record the time difference before and after the call of subprocess.run
+                time_start = time()
+                output = f(*args, **kwargs)
+                time_end = time()
+
+                # Save the elapsed time before and after the call of f into a dict
+                script_runtimes[script_name] = time_end - time_start
+
+                return output
+
+            return wrap
+
+        # Add timer to the 'run' function
+        run = runtime_wrapper(run)
+
+        # Create a function to print out script runtime statistics as a table
+        def print_script_runtime_statistics(script_runtimes):
+
+            # Init variable to compute the sum of scripts' runtimes
+            total_runtime = 0.0  # sec
+
+            # Add runtimes of all scripts to the sum
+            for script_runtime in script_runtimes.values():
+                total_runtime += script_runtime
+
+            # Create a key-value pair for the total runtime of the scripts
+            script_runtimes["Total Runtime"] = total_runtime
+
+            # Compute the width of first column in the table (add 3 for padding)
+            col_width = max(len(name) for name in script_runtimes.keys()) + 3
+
+            # Set the width of the columns
+            first_item_width, second_item_width, third_item_width = col_width, 20, 10
+
+            # Make zeroth row
+            first_item = "Script name".ljust(first_item_width)
+            second_item = "Run time (s)".ljust(second_item_width)
+            third_item = "Fraction".ljust(third_item_width)
+
+            # Print out table header including the zeroth row
+            print()
+            print("Script Run Time Statistics: \n")
+            print(f"{first_item}{second_item}{third_item}")
+            print("-" * (first_item_width + second_item_width + third_item_width))
+
+            # Create and print out the remaining rows
+            for script_name, script_runtime in script_runtimes.items():
+
+                # Fraction of the total runtime per script
+                run_time_fraction = script_runtime / script_runtimes["Total Runtime"]
+
+                first_item = f"{script_name}".ljust(first_item_width)
+                second_item = f"{script_runtime:.4f}".ljust(second_item_width)
+                third_item = f"{run_time_fraction:.6f}".ljust(third_item_width)
+
+                # Print row
+                print(f"{first_item}{second_item}{third_item}")
+
+            print()
+
+            return
 
     def print_if_debug(string: str):
         if args.debug:
@@ -206,7 +287,8 @@ if __name__ == "__main__":
         )
 
         auto_plotter = AutoPlotter(
-            auto_plotter_configs, observational_data_directory=observational_data_path,
+            auto_plotter_configs,
+            observational_data_directory=observational_data_path,
         )
 
         halo_catalogue_filename = f"{args.input[0]}/{args.catalogues[0]}"
@@ -340,6 +422,10 @@ if __name__ == "__main__":
                 *script.additional_argument_list,
             ]
         )
+
+    # Print out script runtime statistics
+    if args.debug:
+        print_script_runtime_statistics(script_runtimes=script_runtimes)
 
     # Create the webpage`
     print_if_debug("Creating webpage.")
