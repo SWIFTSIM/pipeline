@@ -175,7 +175,7 @@ if __name__ == "__main__":
             col_width = max(len(name) for name in script_runtimes.keys()) + 3
 
             # Set the width of the columns
-            first_item_width, second_item_width, third_item_width = col_width, 20, 10
+            first_item_width, second_item_width, third_item_width = col_width, 20, 27
 
             # Make zeroth row
             first_item = "Script name".ljust(first_item_width)
