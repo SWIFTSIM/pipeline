@@ -9,3 +9,4 @@ PyYAML
 swiftsimio
 unyt
 tqdm
+p_tqdm
