@@ -7,7 +7,9 @@ webpages that can represent whole cosmological simulations easily.
 """
 
 import argparse as ap
-from typing import Union
+from typing import Tuple, List, Any
+from p_tqdm import p_map
+from time import time
 
 parser = ap.ArgumentParser(
     prog="swift-pipeline",
@@ -112,6 +114,18 @@ parser.add_argument(
     ),
 )
 
+parser.add_argument(
+    "-j",
+    "--num-of-cpus",
+    required=False,
+    type=int,
+    default=None,
+    help=(
+        "Number of CPUs to use for running scripts in parallel. If not specified, uses "
+        "the maximum number of CPUs avaliable in the system."
+    ),
+)
+
 
 if __name__ == "__main__":
     # Parse our lovely arguments and pass them to the velociraptor library
@@ -142,40 +156,6 @@ if __name__ == "__main__":
     # Set up some basic debugging things
     if args.debug:
         from tqdm import tqdm
-        from time import time
-        from functools import wraps
-
-        # Create dict for recording wall-clock time spent while running scripts
-        script_runtimes = {}
-
-        # Create runtime wrapper to record wall-clock times spent in the calls of
-        # function 'subprocess.run'
-        def runtime_wrapper(f):
-            @wraps(f)
-            def wrap(*args, **kwargs):
-
-                # We assume the wrapper is only used on subprocess.run whose first
-                # argument is a list [python3, path to script, {script params}]. We can
-                # thus fetch the script name as done below
-                try:
-                    script_name = args[0][1].split("/")[-1]
-                except (AttributeError, TypeError):
-                    script_name = "Other calls"
-
-                # Record the time difference before and after the call of subprocess.run
-                time_start = time()
-                output = f(*args, **kwargs)
-                time_end = time()
-
-                # Save the elapsed time before and after the call of f into a dict
-                script_runtimes[script_name] = time_end - time_start
-
-                return output
-
-            return wrap
-
-        # Add timer to the 'run' function
-        run = runtime_wrapper(run)
 
         # Create a function to print out script runtime statistics as a table
         def print_script_runtime_statistics(script_runtimes):
@@ -184,22 +164,23 @@ if __name__ == "__main__":
             total_runtime = 0.0  # sec
 
             # Add runtimes of all scripts to the sum
-            for script_runtime in script_runtimes.values():
-                total_runtime += script_runtime
+            for script_name, script_runtime in script_runtimes.items():
+                if script_name != "Wallclock time":
+                    total_runtime += script_runtime
 
             # Create a key-value pair for the total runtime of the scripts
-            script_runtimes["Total Runtime"] = total_runtime
+            script_runtimes["Total CPU time"] = total_runtime
 
             # Compute the width of first column in the table (add 3 for padding)
             col_width = max(len(name) for name in script_runtimes.keys()) + 3
 
             # Set the width of the columns
-            first_item_width, second_item_width, third_item_width = col_width, 20, 10
+            first_item_width, second_item_width, third_item_width = col_width, 20, 27
 
             # Make zeroth row
             first_item = "Script name".ljust(first_item_width)
             second_item = "Run time (s)".ljust(second_item_width)
-            third_item = "Fraction".ljust(third_item_width)
+            third_item = "Fraction of total CPU time".ljust(third_item_width)
 
             # Print out table header including the zeroth row
             print()
@@ -211,7 +192,7 @@ if __name__ == "__main__":
             for script_name, script_runtime in script_runtimes.items():
 
                 # Fraction of the total runtime per script
-                run_time_fraction = script_runtime / script_runtimes["Total Runtime"]
+                run_time_fraction = script_runtime / script_runtimes["Total CPU time"]
 
                 first_item = f"{script_name}".ljust(first_item_width)
                 second_item = f"{script_runtime:.4f}".ljust(second_item_width)
@@ -397,16 +378,41 @@ if __name__ == "__main__":
     # Now move onto using the ``config`` to generate plots from the actual data.
     scripts_to_use = config.comparison_scripts if is_comparison else config.scripts
 
-    if args.debug:
-        scripts_to_use = tqdm(scripts_to_use, desc="Running Scripts")
+    full_script_path_list = [
+        f"{config.config_directory}/{script.filename}" for script in scripts_to_use
+    ]
+    script_additional_args_list = [
+        script.additional_argument_list for script in scripts_to_use
+    ]
 
-    for script in scripts_to_use:
-        full_script_path = f"{config.config_directory}/{script.filename}"
+    def script_run(script_path: str, script_args: List[Any]) -> Tuple[str, float]:
+        """
+        A function through which scripts can be run in parallel using the p_map method
+        from p_tqdm library.
 
+        Parameters
+        ----------
+
+        script_path: str
+            Absolute path to the script executable including the file name
+
+        script_args: List[Any]
+            Optional arguments to the script
+
+        Returns
+        -------
+
+        output: Tuple[str, float]
+            A tuple containing the script (file) name and the time it took to
+            run the script.
+
+        """
+
+        time_start = time()
         run(
             [
                 "python3",
-                full_script_path,
+                script_path,
                 "-s",
                 *args.snapshots,
                 "-c",
@@ -419,12 +425,69 @@ if __name__ == "__main__":
                 args.output,
                 "-C",
                 config.config_directory,
-                *script.additional_argument_list,
+                *script_args,
             ]
         )
+        time_end = time()
+
+        # Record the time difference before and after the call of subprocess.run
+        script_runtime = time_end - time_start
+
+        try:
+            script_name = script_path.split("/")[-1]
+        except (AttributeError, TypeError):
+            script_name = "Other calls"
+
+        return (script_name, script_runtime)
+
+
+    # Time the call of p_map to measure total wall clock time
+    time_start = time()
+
+    if args.num_of_cpus is not None:
+
+        print_if_debug(f"Running scripts in parallel using {args.num_of_cpus} CPUs.")
+
+        script_runs_out = p_map(
+            script_run,
+            full_script_path_list,
+            script_additional_args_list,
+            num_cpus=args.num_of_cpus,
+            desc="Running Scripts",
+        )
+    else:
+
+        print_if_debug(
+            f"Running scripts in parallel on the maximum number of CPUs " f"avaliable."
+        )
+
+        script_runs_out = p_map(
+            script_run,
+            full_script_path_list,
+            script_additional_args_list,
+            desc="Running Scripts",
+        )
+
+    # Finish calculating wall clock time
+    time_end = time()
 
     # Print out script runtime statistics
     if args.debug:
+
+        # Record wall clock time used to execute all scripts
+        wall_clock_time = time_end - time_start
+
+        # Create dict for recording CPU time spent while running scripts
+        script_runtimes = {}
+
+        # Convert list of tuples to dict
+        for (name, time) in script_runs_out:
+            script_runtimes[name] = time
+
+        # Add wallclock time
+        script_runtimes["Wallclock time"] = wall_clock_time
+
+        # Print out runtime scatistics
         print_script_runtime_statistics(script_runtimes=script_runtimes)
 
     # Create the webpage`
