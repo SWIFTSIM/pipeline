@@ -9,6 +9,7 @@ from typing import List
 direct_read = {
     "auto_plotter_directory": None,
     "auto_plotter_registration": None,
+    "auto_plotter_global_mask": None,
     "observational_data_directory": None,
     "matplotlib_stylesheet": "default",
     "description_template": None,

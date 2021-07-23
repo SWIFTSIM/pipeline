@@ -1,4 +1,4 @@
-#!python3
+#!/usr/bin/env python3
 """
 SWIFT-pipeline is a significantly more complex version of ``velociraptor-plot``.
 
@@ -125,7 +125,6 @@ parser.add_argument(
         "the maximum number of CPUs avaliable in the system."
     ),
 )
-
 
 if __name__ == "__main__":
     # Parse our lovely arguments and pass them to the velociraptor library
@@ -268,8 +267,7 @@ if __name__ == "__main__":
         )
 
         auto_plotter = AutoPlotter(
-            auto_plotter_configs,
-            observational_data_directory=observational_data_path,
+            auto_plotter_configs, observational_data_directory=observational_data_path,
         )
 
         halo_catalogue_filename = f"{args.input[0]}/{args.catalogues[0]}"
@@ -286,13 +284,22 @@ if __name__ == "__main__":
                 f"Using registration functions contained in {registration_filename}"
             )
 
+        # string pointing to the boolean array within the VelociraptorCatalogue object
+        # used to mask the data for all autoplotter plots
+        global_mask_tag = config.auto_plotter_global_mask
+
+        if global_mask_tag is not None:
+            print_if_debug(f"Masking all catalogue properties using {global_mask_tag}")
+
         catalogue = load(
             halo_catalogue_filename,
             disregard_units=True,
             registration_file_path=registration_filename,
         )
         print_if_debug(f"Linking catalogue and AutoPlotter instance.")
-        auto_plotter.link_catalogue(catalogue=catalogue)
+        auto_plotter.link_catalogue(
+            catalogue=catalogue, global_mask_tag=global_mask_tag
+        )
 
         print_if_debug(f"Creating figures with extension .png in {args.output}.")
         print_if_debug("Converting AutoPlotter.plots to a tqdm instance.")
@@ -439,7 +446,6 @@ if __name__ == "__main__":
             script_name = "Other calls"
 
         return (script_name, script_runtime)
-
 
     # Time the call of p_map to measure total wall clock time
     time_start = time()
