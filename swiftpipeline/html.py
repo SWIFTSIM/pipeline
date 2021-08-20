@@ -247,7 +247,7 @@ class WebpageCreator(object):
                             f"If 'output_file' is a list object, then 'title' and 'caption' must be too!"
                         )
 
-                        # Check that the number of plots is the same as the number of their titels and captions
+                        # Check that the number of plots is the same as the number of their titles and captions
                         assert (
                             len(script.output_file)
                             == len(script.title)
@@ -273,7 +273,7 @@ class WebpageCreator(object):
                             # Add collect in a list
                             plots.append(plot)
 
-                    # The script makes just a single plots
+                    # The script makes just a single plot
                     else:
                         plot = dict(
                             filename=script.output_file,
