@@ -12,7 +12,7 @@ from velociraptor.autoplotter.metadata import AutoPlotterMetadata
 
 from jinja2 import Environment, PackageLoader, FileSystemLoader, select_autoescape
 from time import strftime
-from typing import List
+from typing import List, Dict
 from pathlib import Path
 
 import unyt
@@ -230,16 +230,58 @@ class WebpageCreator(object):
         scripts_to_use = config.comparison_scripts if is_comparison else config.scripts
 
         for section in sections:
-            plots = [
-                dict(
-                    filename=script.output_file,
-                    title=script.title,
-                    caption=script.caption,
-                    hash=abs(hash(script.caption + script.title)),
-                )
-                for script in scripts_to_use
-                if script.section == section and script.show_on_webpage
-            ]
+
+            plots: List[Dict] = []
+
+            for script in scripts_to_use:
+                if script.section == section and script.show_on_webpage:
+
+                    # Check whether we expect more than one plot (output file) produced by the script
+                    if isinstance(script.output_file, list):
+
+                        # If so, check that each plot has its own title and caption
+                        assert isinstance(script.title, list) and isinstance(
+                            script.caption, list
+                        ), (
+                            f"Check the config parameters for '{script.filename}'. "
+                            f"If 'output_file' is a list object, then 'title' and 'caption' must be too!"
+                        )
+
+                        # Check that the number of plots is the same as the number of their titles and captions
+                        assert (
+                            len(script.output_file)
+                            == len(script.title)
+                            == len(script.caption)
+                        ), (
+                            f"Check the config parameters for '{script.filename}'. "
+                            f"Lists 'output_file', 'title' and 'caption' must have the same size!"
+                        )
+
+                        # Loop over plots made by the script
+                        for output_file, title, caption in zip(
+                            script.output_file, script.title, script.caption
+                        ):
+
+                            # Save everything into a dict
+                            plot = dict(
+                                filename=output_file,
+                                title=title,
+                                caption=caption,
+                                hash=abs(hash(caption + output_file)),
+                            )
+
+                            # Add collect in a list
+                            plots.append(plot)
+
+                    # The script makes just a single plot
+                    else:
+                        plot = dict(
+                            filename=script.output_file,
+                            title=script.title,
+                            caption=script.caption,
+                            hash=abs(hash(script.caption + script.output_file)),
+                        )
+                        plots.append(plot)
 
             current_section_plots = (
                 self.variables["sections"].get(section, {"plots": []}).get("plots", [])

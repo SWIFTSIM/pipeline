@@ -3,7 +3,7 @@ Configuration object for the entire pipeline.
 """
 
 import yaml
-from typing import List
+from typing import List, Union
 
 # Items to read directly from the yaml file with their defaults
 direct_read = {
@@ -24,16 +24,19 @@ class Script(object):
 
     # Filename of the python script to be ran
     filename: str
-    # Caption for displaying in a webpage, etc.
-    caption: str
-    # Output file name; required to match up the caption and file in
-    # postprocessing
-    output_file: str
+    # Output file name(s)
+    # List of strings if the script produces several plots; otherwise, string
+    # If list, required to have the same size as caption and title
+    output_file: Union[str, List[str]]
+    # Caption(s) for displaying in a webpage, etc.
+    # List of strings if the script produces several plots (one caption per plot); otherwise, string
+    caption: Union[str, List[str]]
     # Section heading; used to classify this with similar figures
     # in the output.
     section: str
-    # Plot title; written above the caption
-    title: str
+    # Plot title(s); written above the caption
+    # List of strings if the script makes several plots (one title per plot); otherwise, string
+    title: Union[str, List[str]]
     # Show on webpage; Defaults to True but used to disable webpage plotting
     # in the config file if required.
     show_on_webpage: bool
