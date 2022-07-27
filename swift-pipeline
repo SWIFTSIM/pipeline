@@ -227,6 +227,8 @@ if __name__ == "__main__":
         )
     )
 
+    box_size_correction_directory = f"{config.config_directory}/box_size_corrections"
+
     print_if_debug("Loading snapshot metadata")
     snapshots = [
         load_snapshot(f"{input}/{snapshot}")
@@ -268,6 +270,7 @@ if __name__ == "__main__":
 
         auto_plotter = AutoPlotter(
             auto_plotter_configs, observational_data_directory=observational_data_path,
+            correction_directory=box_size_correction_directory,
         )
 
         halo_catalogue_filename = f"{args.input[0]}/{args.catalogues[0]}"
