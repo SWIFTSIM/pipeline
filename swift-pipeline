@@ -349,6 +349,7 @@ if __name__ == "__main__":
             names=run_names,
             observational_data_directory=observational_data_path,
             file_extension=PLOT_FILE_EXTENSION,
+            correction_directory=box_size_correction_directory,
         )
 
         if not os.path.exists(args.output):
