@@ -6,7 +6,8 @@ numba
 numpy
 pytest
 PyYAML
-swiftsimio
+swiftsimio>=6.0.0
 unyt
 tqdm
 p_tqdm
+velociraptor>=0.15.6
