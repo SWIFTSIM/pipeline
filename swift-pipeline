@@ -126,6 +126,14 @@ parser.add_argument(
     ),
 )
 
+parser.add_argument(
+    "-M",
+    "--special",
+    required=False,
+    default=None,
+    help="Run using one of the special modes defined in the configuration file.",
+)
+
 if __name__ == "__main__":
     # Parse our lovely arguments and pass them to the velociraptor library
     from velociraptor.autoplotter.objects import AutoPlotter
@@ -214,6 +222,10 @@ if __name__ == "__main__":
 
     config = Config(config_directory=args.config)
 
+    special_mode = None
+    if args.special is not None:
+        special_mode = config.get_special_mode(args.special)
+
     print_if_debug(f"Matplotlib version: {__version__}.")
     if config.matplotlib_stylesheet != "default":
         stylesheet_path = f"{config.config_directory}/{config.matplotlib_stylesheet}"
@@ -269,7 +281,8 @@ if __name__ == "__main__":
         )
 
         auto_plotter = AutoPlotter(
-            auto_plotter_configs, observational_data_directory=observational_data_path,
+            auto_plotter_configs,
+            observational_data_directory=observational_data_path,
             correction_directory=box_size_correction_directory,
         )
 
@@ -299,6 +312,8 @@ if __name__ == "__main__":
             disregard_units=True,
             registration_file_path=registration_filename,
         )
+        if special_mode is not None:
+            special_mode.adapt_catalogue(catalogue)
         print_if_debug(f"Linking catalogue and AutoPlotter instance.")
         auto_plotter.link_catalogue(
             catalogue=catalogue, global_mask_tag=global_mask_tag
@@ -317,8 +332,11 @@ if __name__ == "__main__":
         print_if_debug("Creating AutoPlotterMetadata instance.")
         auto_plotter_metadata = AutoPlotterMetadata(auto_plotter=auto_plotter)
         metadata_filename = (
-            f"{args.input[0]}/{args.metadata}_{args.snapshots[0][-9:-5]}.yml"
+            f"{args.input[0]}/{args.metadata}_{args.snapshots[0][-9:-5]}"
         )
+        if special_mode is not None:
+            metadata_filename += f"_{special_mode.name}"
+        metadata_filename += ".yml"
         print_if_debug(f"Creating and writing metadata to {metadata_filename}")
 
         try:
@@ -328,8 +346,12 @@ if __name__ == "__main__":
             pass
     else:
         # Need to generate our data again from the built-in yaml files.
+        if special_mode is not None:
+            suffix = f"_{special_mode.name}.yml"
+        else:
+            suffix = ".yml"
         metadata_filenames = [
-            f"{input}/{args.metadata}_{snapshot[-9:-5]}.yml"
+            f"{input}/{args.metadata}_{snapshot[-9:-5]}{suffix}"
             for input, snapshot in zip(args.input, args.snapshots)
         ]
 
@@ -502,10 +524,16 @@ if __name__ == "__main__":
 
     # Create the webpage`
     print_if_debug("Creating webpage.")
-    webpage = WebpageCreator()
+    warnings = []
+    if special_mode is not None:
+        warnings.append(f"Running in special mode {special_mode.name}.")
+    webpage = WebpageCreator(warnings)
     webpage.add_auto_plotter_metadata(auto_plotter_metadata=auto_plotter_metadata)
     webpage.add_config_metadata(config=config, is_comparison=is_comparison)
-    webpage.add_metadata(page_name=" | ".join(run_names))
+    page_name = " | ".join(run_names)
+    if special_mode is not None:
+        page_name = f"SPECIAL {special_mode.name} - {page_name}"
+    webpage.add_metadata(page_name=page_name)
     webpage.add_run_metadata(config=config, snapshots=snapshots)
     webpage.render_webpage()
     webpage.save_html(f"{args.output}/index.html")
