@@ -300,11 +300,7 @@ def create_scatter(
         if cache is None:
             cache = particle_array * particle_data.masses
 
-            setattr(
-                particle_data,
-                cache_name,
-                cache,
-            )
+            setattr(particle_data, cache_name, cache)
 
         weighted_image = project_pixel_grid(project=cache_name, **common_attributes)
 
@@ -407,20 +403,13 @@ def save_figure_from_scatter(
     extent = extent_given_r(radius)
 
     imshow = ax.imshow(
-        scatter.v.T,
-        origin="lower",
-        norm=norm,
-        cmap=image.cmap,
-        extent=extent,
+        scatter.v.T, origin="lower", norm=norm, cmap=image.cmap, extent=extent
     )
 
     color_bar_ax = fig.add_axes([0.05, 0.95, 0.9, 0.03])
 
     color_bar = fig.colorbar(
-        mappable=imshow,
-        ax=ax,
-        cax=color_bar_ax,
-        orientation="horizontal",
+        mappable=imshow, ax=ax, cax=color_bar_ax, orientation="horizontal"
     )
 
     color_bar_label = image.visualise.title().replace("_", " ")
@@ -547,13 +536,7 @@ def save_thumbnail_from_scatter(
 
     extent = extent_given_r(radius)
 
-    ax.imshow(
-        scatter.v.T,
-        origin="lower",
-        norm=norm,
-        cmap=image.cmap,
-        extent=extent,
-    )
+    ax.imshow(scatter.v.T, origin="lower", norm=norm, cmap=image.cmap, extent=extent)
 
     fig.savefig(output_filename)
 
@@ -563,10 +546,7 @@ def save_thumbnail_from_scatter(
 
 
 def visualise_halo(
-    output_path: Path,
-    snapshot_path: Path,
-    config: ImageConfig,
-    halo: Halo,
+    output_path: Path, snapshot_path: Path, config: ImageConfig, halo: Halo
 ):
     """
     Creates all of the visualisations in the config for the
@@ -677,10 +657,7 @@ def build_webpage(config: ImageConfig, haloes: List[Halo], output_path: Path):
     """
     Builds and aves the webpages.
     """
-    creator = ImageWebpageCreator(
-        haloes=haloes,
-        config=config,
-    )
+    creator = ImageWebpageCreator(haloes=haloes, config=config)
 
     creator.save_html(output_path=output_path)
 

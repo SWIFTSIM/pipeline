@@ -100,7 +100,7 @@ class WebpageCreator(object):
     auto_plotter_metadata: AutoPlotterMetadata
     config: Config
 
-    def __init__(self):
+    def __init__(self, fast_mode=False):
         """
         Sets up the ``jinja`` templating system.
         """
@@ -118,6 +118,7 @@ class WebpageCreator(object):
             creation_date=strftime(r"%Y-%m-%d"),
             sections={},
             runs=[],
+            fast_mode=fast_mode,
         )
 
         return
@@ -322,7 +323,7 @@ class WebpageCreator(object):
                 dict(
                     description=environment.get_template(
                         config.description_template
-                    ).render(data=data),
+                    ).render(data=data)
                 )
                 for data in snapshots
             ]

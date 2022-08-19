@@ -11,3 +11,5 @@ data_0000.yml
 metadata_0000.yml
 *.png
 test_output/*
+
+black_formatting_env/*
