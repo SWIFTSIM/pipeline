@@ -135,6 +135,15 @@ parser.add_argument(
     help="Run in fast mode. This only creates the catalogue plots, but does not run any additional scripts.",
 )
 
+parser.add_argument(
+    "-F",
+    "--no-plots",
+    required=False,
+    default=False,
+    action="store_true",
+    help="Do not create any plots or web pages. Only produces the autoplotter .yml file. Requires --fast.",
+)
+
 if __name__ == "__main__":
     # Parse our lovely arguments and pass them to the velociraptor library
     from velociraptor.autoplotter.objects import AutoPlotter
@@ -160,6 +169,13 @@ if __name__ == "__main__":
     PLOT_FILE_EXTENSION = "png"
 
     args = parser.parse_args()
+
+    if args.no_plots and not args.fast:
+        raise AttributeError("Cannot have --no-plots without --fast!")
+
+    is_comparison = len(args.snapshots) > 1
+    if args.no_plots and is_comparison:
+        raise AttributeError("Cannot have --no-plots when running in comparison mode.")
 
     # Set up some basic debugging things
     if args.debug:
@@ -268,8 +284,6 @@ if __name__ == "__main__":
         f"{config.config_directory}/{config.observational_data_directory}/data"
     )
 
-    is_comparison = len(args.snapshots) > 1
-
     if not is_comparison:
         # Run the pipeline based on the arguments if only a single simulation is
         # included and generate the metadata yaml file.
@@ -321,7 +335,10 @@ if __name__ == "__main__":
             auto_plotter.plots = tqdm(auto_plotter.plots, desc="Creating figures")
 
         auto_plotter.create_plots(
-            directory=args.output, file_extension=PLOT_FILE_EXTENSION, debug=args.debug
+            directory=args.output,
+            file_extension=PLOT_FILE_EXTENSION,
+            debug=args.debug,
+            no_plots=args.no_plots,
         )
 
         print_if_debug("Creating AutoPlotterMetadata instance.")
@@ -516,18 +533,19 @@ if __name__ == "__main__":
             # Print out runtime scatistics
             print_script_runtime_statistics(script_runtimes=script_runtimes)
 
-    # Create the webpage`
-    print_if_debug("Creating webpage.")
-    webpage = WebpageCreator(args.fast)
-    webpage.add_auto_plotter_metadata(auto_plotter_metadata=auto_plotter_metadata)
-    if not args.fast:
-        webpage.add_config_metadata(config=config, is_comparison=is_comparison)
-    page_name = " | ".join(run_names)
-    if args.fast:
-        page_name = f"FAST mode - {page_name}"
-    webpage.add_metadata(page_name=page_name)
-    webpage.add_run_metadata(config=config, snapshots=snapshots)
-    webpage.render_webpage()
-    webpage.save_html(f"{args.output}/index.html")
+    if not args.no_plots:
+        # Create the webpage`
+        print_if_debug("Creating webpage.")
+        webpage = WebpageCreator(args.fast)
+        webpage.add_auto_plotter_metadata(auto_plotter_metadata=auto_plotter_metadata)
+        if not args.fast:
+            webpage.add_config_metadata(config=config, is_comparison=is_comparison)
+        page_name = " | ".join(run_names)
+        if args.fast:
+            page_name = f"FAST mode - {page_name}"
+        webpage.add_metadata(page_name=page_name)
+        webpage.add_run_metadata(config=config, snapshots=snapshots)
+        webpage.render_webpage()
+        webpage.save_html(f"{args.output}/index.html")
 
     print_if_debug("Done.")
