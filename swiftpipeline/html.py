@@ -12,7 +12,7 @@ from velociraptor.autoplotter.metadata import AutoPlotterMetadata
 
 from jinja2 import Environment, PackageLoader, FileSystemLoader, select_autoescape
 from time import strftime
-from typing import List, Dict
+from typing import List, Dict, Optional
 from pathlib import Path
 
 import unyt
@@ -100,7 +100,7 @@ class WebpageCreator(object):
     auto_plotter_metadata: AutoPlotterMetadata
     config: Config
 
-    def __init__(self, fast_mode=False):
+    def __init__(self, warnings: Optional[List[str]] = []):
         """
         Sets up the ``jinja`` templating system.
         """
@@ -118,7 +118,7 @@ class WebpageCreator(object):
             creation_date=strftime(r"%Y-%m-%d"),
             sections={},
             runs=[],
-            fast_mode=fast_mode,
+            warnings=warnings,
         )
 
         return

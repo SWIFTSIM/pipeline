@@ -85,6 +85,23 @@ class Script(object):
         return additional_arguments
 
 
+class SpecialMode(object):
+    """
+  Special mode that runs a script to make changes to the catalogue between reading it and plotting it.
+  """
+
+    name: str
+    script_file: str
+
+    def __init__(self, name: str, script_file: str):
+        self.name = name
+        self.script_file = script_file
+
+    def adapt_catalogue(self, catalogue):
+        with open(self.script_file, "r") as handle:
+            exec(handle.read())
+
+
 class Config(object):
     """
     Configuration object containing the major parameters read from the
@@ -94,10 +111,12 @@ class Config(object):
     # Raw config read directly from the file, before processing.
     raw_config: dict
     raw_scripts: List[Script]
+    raw_specials: List[SpecialMode]
 
     # Set up the object.
     __slots__ = list(direct_read.keys()) + [
         "raw_scripts",
+        "raw_specials",
         "config_directory",
         "raw_config",
     ]
@@ -118,6 +137,7 @@ class Config(object):
         self.__read_config()
         self.__extract_to_variables()
         self.__extract_scripts()
+        self.__extract_specials()
 
         return
 
@@ -161,6 +181,16 @@ class Config(object):
 
         return
 
+    def __extract_specials(self):
+        raw_specials = self.raw_config.get("special_modes", [])
+        self.raw_specials = {
+            sp["name"]: SpecialMode(
+                sp["name"], f'{self.config_directory}/{sp["script"]}'
+            )
+            for sp in raw_specials
+        }
+        return
+
     @property
     def scripts(self):
         """
@@ -175,3 +205,8 @@ class Config(object):
         file.
         """
         return [script for script in self.raw_scripts if script.use_for_comparison]
+
+    def get_special_mode(self, mode):
+        if not mode in self.raw_specials:
+            raise AttributeError(f"Unknown special mode: {mode}!")
+        return self.raw_specials[mode]
