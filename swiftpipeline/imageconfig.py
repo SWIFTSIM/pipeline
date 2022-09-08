@@ -224,11 +224,7 @@ class ImageConfig(object):
                 )
             except RuntimeError:
                 value, unit = self.raw_config.get(variable, default)
-                setattr(
-                    self,
-                    variable,
-                    unyt_quantity(float(value), unit),
-                )
+                setattr(self, variable, unyt_quantity(float(value), unit))
 
         return
 

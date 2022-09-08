@@ -14,7 +14,7 @@
 {% block content %}
 {# Describe the runs that are included #}
 <div class="section run-descriptions">
-    <h1>Included Runs</h1>
+    <h1>Included Runs{% if fast_mode %} - FAST mode{% endif %}</h1>
     <div class="plot-container">
         {% for run in runs %}
         <div class="run">

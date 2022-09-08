@@ -126,6 +126,24 @@ parser.add_argument(
     ),
 )
 
+parser.add_argument(
+    "-f",
+    "--fast",
+    required=False,
+    default=False,
+    action="store_true",
+    help="Run in fast mode. This only creates the catalogue plots, but does not run any additional scripts.",
+)
+
+parser.add_argument(
+    "-F",
+    "--no-plots",
+    required=False,
+    default=False,
+    action="store_true",
+    help="Do not create any plots or web pages. Only produces the autoplotter .yml file. Requires --fast.",
+)
+
 if __name__ == "__main__":
     # Parse our lovely arguments and pass them to the velociraptor library
     from velociraptor.autoplotter.objects import AutoPlotter
@@ -151,6 +169,13 @@ if __name__ == "__main__":
     PLOT_FILE_EXTENSION = "png"
 
     args = parser.parse_args()
+
+    if args.no_plots and not args.fast:
+        raise AttributeError("Cannot have --no-plots without --fast!")
+
+    is_comparison = len(args.snapshots) > 1
+    if args.no_plots and is_comparison:
+        raise AttributeError("Cannot have --no-plots when running in comparison mode.")
 
     # Set up some basic debugging things
     if args.debug:
@@ -259,8 +284,6 @@ if __name__ == "__main__":
         f"{config.config_directory}/{config.observational_data_directory}/data"
     )
 
-    is_comparison = len(args.snapshots) > 1
-
     if not is_comparison:
         # Run the pipeline based on the arguments if only a single simulation is
         # included and generate the metadata yaml file.
@@ -269,7 +292,8 @@ if __name__ == "__main__":
         )
 
         auto_plotter = AutoPlotter(
-            auto_plotter_configs, observational_data_directory=observational_data_path,
+            auto_plotter_configs,
+            observational_data_directory=observational_data_path,
             correction_directory=box_size_correction_directory,
         )
 
@@ -311,7 +335,10 @@ if __name__ == "__main__":
             auto_plotter.plots = tqdm(auto_plotter.plots, desc="Creating figures")
 
         auto_plotter.create_plots(
-            directory=args.output, file_extension=PLOT_FILE_EXTENSION, debug=args.debug
+            directory=args.output,
+            file_extension=PLOT_FILE_EXTENSION,
+            debug=args.debug,
+            no_plots=args.no_plots,
         )
 
         print_if_debug("Creating AutoPlotterMetadata instance.")
@@ -451,63 +478,74 @@ if __name__ == "__main__":
 
         return (script_name, script_runtime)
 
-    # Time the call of p_map to measure total wall clock time
-    time_start = time()
-
-    if args.num_of_cpus is not None:
-
-        print_if_debug(f"Running scripts in parallel using {args.num_of_cpus} CPUs.")
-
-        script_runs_out = p_map(
-            script_run,
-            full_script_path_list,
-            script_additional_args_list,
-            num_cpus=args.num_of_cpus,
-            desc="Running Scripts",
-        )
+    if args.fast:
+        print("Fast mode, not running scripts.")
     else:
+        # Time the call of p_map to measure total wall clock time
+        time_start = time()
 
-        print_if_debug(
-            f"Running scripts in parallel on the maximum number of CPUs " f"avaliable."
-        )
+        if args.num_of_cpus is not None:
 
-        script_runs_out = p_map(
-            script_run,
-            full_script_path_list,
-            script_additional_args_list,
-            desc="Running Scripts",
-        )
+            print_if_debug(
+                f"Running scripts in parallel using {args.num_of_cpus} CPUs."
+            )
 
-    # Finish calculating wall clock time
-    time_end = time()
+            script_runs_out = p_map(
+                script_run,
+                full_script_path_list,
+                script_additional_args_list,
+                num_cpus=args.num_of_cpus,
+                desc="Running Scripts",
+            )
+        else:
 
-    # Print out script runtime statistics
-    if args.debug:
+            print_if_debug(
+                f"Running scripts in parallel on the maximum number of CPUs "
+                f"avaliable."
+            )
 
-        # Record wall clock time used to execute all scripts
-        wall_clock_time = time_end - time_start
+            script_runs_out = p_map(
+                script_run,
+                full_script_path_list,
+                script_additional_args_list,
+                desc="Running Scripts",
+            )
 
-        # Create dict for recording CPU time spent while running scripts
-        script_runtimes = {}
+        # Finish calculating wall clock time
+        time_end = time()
 
-        # Convert list of tuples to dict
-        for (name, time) in script_runs_out:
-            script_runtimes[name] = time
+        # Print out script runtime statistics
+        if args.debug:
 
-        # Add wallclock time
-        script_runtimes["Wallclock time"] = wall_clock_time
+            # Record wall clock time used to execute all scripts
+            wall_clock_time = time_end - time_start
 
-        # Print out runtime scatistics
-        print_script_runtime_statistics(script_runtimes=script_runtimes)
+            # Create dict for recording CPU time spent while running scripts
+            script_runtimes = {}
 
-    # Create the webpage`
-    print_if_debug("Creating webpage.")
-    webpage = WebpageCreator()
-    webpage.add_auto_plotter_metadata(auto_plotter_metadata=auto_plotter_metadata)
-    webpage.add_config_metadata(config=config, is_comparison=is_comparison)
-    webpage.add_metadata(page_name=" | ".join(run_names))
-    webpage.add_run_metadata(config=config, snapshots=snapshots)
-    webpage.render_webpage()
-    webpage.save_html(f"{args.output}/index.html")
+            # Convert list of tuples to dict
+            for (name, time) in script_runs_out:
+                script_runtimes[name] = time
+
+            # Add wallclock time
+            script_runtimes["Wallclock time"] = wall_clock_time
+
+            # Print out runtime scatistics
+            print_script_runtime_statistics(script_runtimes=script_runtimes)
+
+    if not args.no_plots:
+        # Create the webpage`
+        print_if_debug("Creating webpage.")
+        webpage = WebpageCreator(args.fast)
+        webpage.add_auto_plotter_metadata(auto_plotter_metadata=auto_plotter_metadata)
+        if not args.fast:
+            webpage.add_config_metadata(config=config, is_comparison=is_comparison)
+        page_name = " | ".join(run_names)
+        if args.fast:
+            page_name = f"FAST mode - {page_name}"
+        webpage.add_metadata(page_name=page_name)
+        webpage.add_run_metadata(config=config, snapshots=snapshots)
+        webpage.render_webpage()
+        webpage.save_html(f"{args.output}/index.html")
 
     print_if_debug("Done.")
