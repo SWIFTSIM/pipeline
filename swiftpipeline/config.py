@@ -4,10 +4,11 @@ Configuration object for the entire pipeline.
 
 import yaml
 from typing import List, Union
+import os
+import glob
 
 # Items to read directly from the yaml file with their defaults
 direct_read = {
-    "auto_plotter_directory": None,
     "auto_plotter_registration": None,
     "auto_plotter_global_mask": None,
     "observational_data_directory": None,
@@ -119,6 +120,7 @@ class Config(object):
         "raw_specials",
         "config_directory",
         "raw_config",
+        "auto_plotter_configs",
     ]
 
     def __init__(self, config_directory: str):
@@ -163,7 +165,7 @@ class Config(object):
                 ) as handle:
                     extra_raw_config = yaml.safe_load(handle)
                 for key in extra_raw_config:
-                    if key in ["scripts", "special_modes"]:
+                    if key in ["scripts", "special_modes", "auto_plotter_configs"]:
                         # append additional items
                         if not key in self.raw_config:
                             self.raw_config[key] = []
@@ -182,6 +184,25 @@ class Config(object):
 
         for variable, default in direct_read.items():
             setattr(self, variable, self.raw_config.get(variable, default))
+
+        self.auto_plotter_configs = []
+        for auto_plotter_config in self.raw_config.get("auto_plotter_configs", []):
+            auto_plotter_config = f"{self.config_directory}/{auto_plotter_config}"
+            if os.path.isfile(auto_plotter_config):
+                self.auto_plotter_configs.append(auto_plotter_config)
+            else:
+                self.auto_plotter_configs.extend(
+                    reversed(glob.glob(f"{auto_plotter_config}/*.yml"))
+                )
+        # support legacy auto_plotter_directory variable
+        if "auto_plotter_directory" in self.raw_config:
+            self.auto_plotter_configs.extend(
+                reversed(
+                    glob.glob(
+                        f"{self.config_directory}/{self.raw_config['auto_plotter_directory']}/*.yml"
+                    )
+                )
+            )
 
         return
 
