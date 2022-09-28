@@ -9,7 +9,7 @@ import glob
 
 # Items to read directly from the yaml file with their defaults
 direct_read = {
-    "auto_plotter_registration": None,
+    "auto_plotter_registration": [],
     "auto_plotter_global_mask": None,
     "observational_data_directory": None,
     "matplotlib_stylesheet": "default",
@@ -121,6 +121,7 @@ class Config(object):
         "config_directory",
         "raw_config",
         "auto_plotter_configs",
+        "auto_plotter_registrations",
     ]
 
     def __init__(self, config_directory: str):
@@ -158,6 +159,14 @@ class Config(object):
         with open(f"{self.config_directory}/config.yml", "r") as handle:
             self.raw_config = yaml.safe_load(handle)
 
+        if "auto_plotter_registration" in self.raw_config:
+            if not isinstance(self.raw_config["auto_plotter_registration"], list):
+                self.raw_config["auto_plotter_registration"] = [
+                    self.raw_config["auto_plotter_registration"]
+                ]
+        else:
+            self.raw_config["auto_plotter_registration"] = []
+
         if "extra_config" in self.raw_config:
             for extra_config_file in self.raw_config["extra_config"]:
                 with open(
@@ -165,11 +174,19 @@ class Config(object):
                 ) as handle:
                     extra_raw_config = yaml.safe_load(handle)
                 for key in extra_raw_config:
-                    if key in ["scripts", "special_modes", "auto_plotter_configs"]:
+                    if key in [
+                        "scripts",
+                        "special_modes",
+                        "auto_plotter_configs",
+                        "auto_plotter_registration",
+                    ]:
                         # append additional items
                         if not key in self.raw_config:
                             self.raw_config[key] = []
-                        for extra_item in extra_raw_config[key]:
+                        extra_list = extra_raw_config[key]
+                        if not isinstance(extra_list, list):
+                            extra_list = [extra_list]
+                        for extra_item in extra_list:
                             self.raw_config[key].append(extra_item)
                     else:
                         # overwrite the original value

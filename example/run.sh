@@ -2,8 +2,12 @@
 
 # Grab test data
 
-wget http://virgodb.cosma.dur.ac.uk/swift-webstorage/IOExamples/cosmo_volume_example.hdf5 -O cosmo_0000.hdf5
-wget http://virgodb.cosma.dur.ac.uk/swift-webstorage/IOExamples/cosmo_volume_example.properties -O cosmo_0000.properties
+if [ ! -f cosmo_0000.hdf5 ]; then
+  wget http://virgodb.cosma.dur.ac.uk/swift-webstorage/IOExamples/cosmo_volume_example.hdf5 -O cosmo_0000.hdf5
+fi
+if [ ! -f cosmo_0000.properties ]; then
+  wget http://virgodb.cosma.dur.ac.uk/swift-webstorage/IOExamples/cosmo_volume_example.properties -O cosmo_0000.properties
+fi
 
 # Example of how to run the new pipeline.
 
@@ -27,8 +31,8 @@ swift-pipeline -C example/config \
                -c cosmo_0000.properties \
                -s cosmo_0000.hdf5 \
                -o test_output \
-               -i . 
-               
+               -i .
+
 return_code=$(( $return_code > $? ? $return_code : $? ))
 
 # With custom names

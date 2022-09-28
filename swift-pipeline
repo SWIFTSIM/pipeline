@@ -308,11 +308,10 @@ if __name__ == "__main__":
         halo_catalogue_filename = f"{args.input[0]}/{args.catalogues[0]}"
         print_if_debug(f"Loading halo catalogue at {halo_catalogue_filename}.")
 
-        registration_filename = (
-            None
-            if config.auto_plotter_registration is None
-            else f"{config.config_directory}/{config.auto_plotter_registration}"
-        )
+        registration_filename = [
+            f"{config.config_directory}/{file_path}"
+            for file_path in config.auto_plotter_registration
+        ]
 
         if registration_filename is not None:
             print_if_debug(
