@@ -156,6 +156,23 @@ class Config(object):
         with open(f"{self.config_directory}/config.yml", "r") as handle:
             self.raw_config = yaml.safe_load(handle)
 
+        if "extra_config" in self.raw_config:
+            for extra_config_file in self.raw_config["extra_config"]:
+                with open(
+                    f"{self.config_directory}/{extra_config_file}", "r"
+                ) as handle:
+                    extra_raw_config = yaml.safe_load(handle)
+                for key in extra_raw_config:
+                    if key in ["scripts", "special_modes"]:
+                        # append additional items
+                        if not key in self.raw_config:
+                            self.raw_config[key] = []
+                        for extra_item in extra_raw_config[key]:
+                            self.raw_config[key].append(extra_item)
+                    else:
+                        # overwrite the original value
+                        self.raw_config[key] = extra_raw_config[key]
+
         return
 
     def __extract_to_variables(self):

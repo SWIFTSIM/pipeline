@@ -14,7 +14,6 @@ def test_config(path="tests/test_config"):
 
     config = Config(config_directory=path)
 
-
 def test_image_config(path="tests/test_config"):
     """
     Tests loading an image config doesn't induce a crash,
