@@ -168,16 +168,11 @@ class Config(object):
         with open(f"{self.config_directory}/config.yml", "r") as handle:
             self.raw_config = yaml.safe_load(handle)
         for key in appendable_config_keys:
-            if key not in self.raw_config:
+            if key in self.raw_config:
+                if not isinstance(self.raw_config[key], list):
+                    self.raw_config[key] = [self.raw_config[key]]
+            else:
                 self.raw_config[key] = []
-
-        if "auto_plotter_registration" in self.raw_config:
-            if not isinstance(self.raw_config["auto_plotter_registration"], list):
-                self.raw_config["auto_plotter_registration"] = [
-                    self.raw_config["auto_plotter_registration"]
-                ]
-        else:
-            self.raw_config["auto_plotter_registration"] = []
 
         if "extra_config" in self.raw_config:
             for extra_config_file in self.raw_config["extra_config"]:
