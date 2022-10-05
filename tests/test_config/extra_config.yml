@@ -1,0 +1,14 @@
+scripts:
+  - filename: scripts/pressure_temperature.py
+    caption: Hello World
+    output_file: pressure_temperature.png
+    section: Pressure-Temperature
+    title: Pressure-Temperature Diagram
+    additional_args:
+      quantity_type: hydro
+
+auto_plotter_configs:
+  - extra_auto_plotter_folder
+  - extra_auto_plotter_file.yml
+
+auto_plotter_registration: extra_registration.py

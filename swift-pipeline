@@ -258,11 +258,7 @@ if __name__ == "__main__":
         style.use(stylesheet_path)
 
     # Reverse so most recently modified is at the top.
-    auto_plotter_configs = list(
-        reversed(
-            glob(f"{config.config_directory}/{config.auto_plotter_directory}/*.yml")
-        )
-    )
+    auto_plotter_configs = list(config.auto_plotter_configs)
 
     box_size_correction_directory = f"{config.config_directory}/box_size_corrections"
 
@@ -300,7 +296,7 @@ if __name__ == "__main__":
         # Run the pipeline based on the arguments if only a single simulation is
         # included and generate the metadata yaml file.
         print_if_debug(
-            f"Generating initial AutoPlotter instance for {config.auto_plotter_directory}."
+            f"Generating initial AutoPlotter instance for {auto_plotter_configs}."
         )
 
         auto_plotter = AutoPlotter(
@@ -312,11 +308,10 @@ if __name__ == "__main__":
         halo_catalogue_filename = f"{args.input[0]}/{args.catalogues[0]}"
         print_if_debug(f"Loading halo catalogue at {halo_catalogue_filename}.")
 
-        registration_filename = (
-            None
-            if config.auto_plotter_registration is None
-            else f"{config.config_directory}/{config.auto_plotter_registration}"
-        )
+        registration_filename = [
+            f"{config.config_directory}/{file_path}"
+            for file_path in config.auto_plotter_registration
+        ]
 
         if registration_filename is not None:
             print_if_debug(

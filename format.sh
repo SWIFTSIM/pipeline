@@ -21,6 +21,7 @@ black="./black_formatting_env/bin/python3 -m black"
 
 # Formatting command
 files=$(find swiftpipeline/ -name "*.py")
+files="$files $(find tests/ -name '*.py')"
 files="$files swift-image swift-pipeline"
 cmd="$black -t py38 $files"
 

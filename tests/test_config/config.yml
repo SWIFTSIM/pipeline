@@ -24,3 +24,6 @@ scripts:
     title: Density-Temperature Diagram
     additional_args:
       quantity_type: hydro
+
+extra_config:
+ - extra_config.yml

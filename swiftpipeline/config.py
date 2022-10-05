@@ -4,17 +4,28 @@ Configuration object for the entire pipeline.
 
 import yaml
 from typing import List, Union
+import os
+import glob
 
 # Items to read directly from the yaml file with their defaults
 direct_read = {
-    "auto_plotter_directory": None,
-    "auto_plotter_registration": None,
+    "auto_plotter_registration": [],
     "auto_plotter_global_mask": None,
     "observational_data_directory": None,
     "matplotlib_stylesheet": "default",
     "description_template": None,
     "custom_css": None,
 }
+
+# Configuration options that are appendable lists
+# If one of these is found in an extra configuration file, its value(s) is (are)
+# added to the existing list.
+appendable_config_keys = [
+    "scripts",
+    "special_modes",
+    "auto_plotter_configs",
+    "auto_plotter_registration",
+]
 
 
 class Script(object):
@@ -119,6 +130,7 @@ class Config(object):
         "raw_specials",
         "config_directory",
         "raw_config",
+        "auto_plotter_configs",
     ]
 
     def __init__(self, config_directory: str):
@@ -155,6 +167,33 @@ class Config(object):
 
         with open(f"{self.config_directory}/config.yml", "r") as handle:
             self.raw_config = yaml.safe_load(handle)
+        for key in appendable_config_keys:
+            if key in self.raw_config:
+                if not isinstance(self.raw_config[key], list):
+                    self.raw_config[key] = [self.raw_config[key]]
+            else:
+                self.raw_config[key] = []
+
+        if "extra_config" in self.raw_config:
+            for extra_config_file in self.raw_config["extra_config"]:
+                extra_raw_config = None
+                with open(
+                    f"{self.config_directory}/{extra_config_file}", "r"
+                ) as handle:
+                    extra_raw_config = yaml.safe_load(handle)
+                for key in extra_raw_config:
+                    if key in appendable_config_keys:
+                        # append additional items
+                        extra_list = extra_raw_config[key]
+                        if not isinstance(extra_list, list):
+                            extra_list = [extra_list]
+                        for extra_item in extra_list:
+                            self.raw_config[key].append(extra_item)
+                    else:
+                        # if the key is not an appendable list, it must be a
+                        # parameter that can only have one value
+                        # overwrite the original value
+                        self.raw_config[key] = extra_raw_config[key]
 
         return
 
@@ -165,6 +204,25 @@ class Config(object):
 
         for variable, default in direct_read.items():
             setattr(self, variable, self.raw_config.get(variable, default))
+
+        self.auto_plotter_configs = []
+        for auto_plotter_config in self.raw_config.get("auto_plotter_configs", []):
+            auto_plotter_config = f"{self.config_directory}/{auto_plotter_config}"
+            if os.path.isfile(auto_plotter_config):
+                self.auto_plotter_configs.append(auto_plotter_config)
+            else:
+                self.auto_plotter_configs.extend(
+                    reversed(glob.glob(f"{auto_plotter_config}/*.yml"))
+                )
+        # support legacy auto_plotter_directory variable
+        if "auto_plotter_directory" in self.raw_config:
+            self.auto_plotter_configs.extend(
+                reversed(
+                    glob.glob(
+                        f"{self.config_directory}/{self.raw_config['auto_plotter_directory']}/*.yml"
+                    )
+                )
+            )
 
         return
 
