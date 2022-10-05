@@ -17,6 +17,16 @@ direct_read = {
     "custom_css": None,
 }
 
+# Configuration options that are appendable lists
+# If one of these is found in an extra configuration file, its value(s) is (are)
+# added to the existing list.
+appendable_config_keys = [
+    "scripts",
+    "special_modes",
+    "auto_plotter_configs",
+    "auto_plotter_registration",
+]
+
 
 class Script(object):
     """
@@ -121,7 +131,6 @@ class Config(object):
         "config_directory",
         "raw_config",
         "auto_plotter_configs",
-        "auto_plotter_registrations",
     ]
 
     def __init__(self, config_directory: str):
@@ -158,6 +167,9 @@ class Config(object):
 
         with open(f"{self.config_directory}/config.yml", "r") as handle:
             self.raw_config = yaml.safe_load(handle)
+        for key in appendable_config_keys:
+            if key not in self.raw_config:
+                self.raw_config[key] = []
 
         if "auto_plotter_registration" in self.raw_config:
             if not isinstance(self.raw_config["auto_plotter_registration"], list):
@@ -169,26 +181,22 @@ class Config(object):
 
         if "extra_config" in self.raw_config:
             for extra_config_file in self.raw_config["extra_config"]:
+                extra_raw_config = None
                 with open(
                     f"{self.config_directory}/{extra_config_file}", "r"
                 ) as handle:
                     extra_raw_config = yaml.safe_load(handle)
                 for key in extra_raw_config:
-                    if key in [
-                        "scripts",
-                        "special_modes",
-                        "auto_plotter_configs",
-                        "auto_plotter_registration",
-                    ]:
+                    if key in appendable_config_keys:
                         # append additional items
-                        if not key in self.raw_config:
-                            self.raw_config[key] = []
                         extra_list = extra_raw_config[key]
                         if not isinstance(extra_list, list):
                             extra_list = [extra_list]
                         for extra_item in extra_list:
                             self.raw_config[key].append(extra_item)
                     else:
+                        # if the key is not an appendable list, it must be a
+                        # parameter that can only have one value
                         # overwrite the original value
                         self.raw_config[key] = extra_raw_config[key]
 
