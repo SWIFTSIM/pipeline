@@ -24,8 +24,7 @@ from swiftsimio.visualisation.smoothing_length_generation import (
 )
 from swiftsimio.visualisation.rotation import rotation_matrix_from_vector
 
-from swiftsimio import load, mask, SWIFTDataset
-from velociraptor import load as load_catalogue
+from swiftsimio import load, load as load_catalogue, mask, SWIFTDataset
 from swiftpipeline.html import ImageWebpageCreator
 
 from pathlib import Path
@@ -112,13 +111,13 @@ def haloes_to_visualise(config: ImageConfig, catalogue_path: Path) -> List[Halo]
 
     catalogue = load_catalogue(catalogue_path)
 
-    mass_200crit = catalogue.masses.mass_200crit
-    a = catalogue.a
+    mass_200crit = catalogue.spherical_overdensity_200_crit.total_mass
+    a = float(catalogue.metadata.scale_factor)
 
     mask = mass_200crit > config.minimum_halo_mass
 
     if config.centrals_only:
-        mask = np.logical_and(mask, catalogue.structure_type.structuretype == 10)
+        mask = np.logical_and(mask, catalogue.input_halos.is_central.astype(bool))
 
     # Generate some randomness
     rng = np.random.default_rng()
@@ -173,24 +172,20 @@ def haloes_to_visualise(config: ImageConfig, catalogue_path: Path) -> List[Halo]
     halo_ids_valid = np.arange(len(mass_200crit))[mask][halo_id_order]
 
     for unique_id in halo_ids_valid:
+        centre = catalogue.input_halos.halo_centre[unique_id]
+        angular_mom = catalogue.bound_subhalo.angular_momentum_stars[unique_id]
         haloes.append(
             Halo(
-                mass_200_crit=catalogue.masses.mass_200crit[unique_id],
-                radius_200_crit=catalogue.radii.r_200crit[unique_id] / a,
-                mass_100_kpc_star=catalogue.apertures.mass_star_100_kpc[unique_id],
-                radius_100_kpc_star=catalogue.apertures.rhalfmass_star_100_kpc[
+                mass_200_crit=catalogue.spherical_overdensity_200_crit.total_mass[unique_id],
+                radius_200_crit=catalogue.spherical_overdensity_200_crit.soradius[unique_id] / a,
+                mass_100_kpc_star=catalogue.exclusive_sphere_100kpc.stellar_mass[unique_id],
+                radius_100_kpc_star=catalogue.exclusive_sphere_100kpc.half_mass_radius_stars[
                     unique_id
                 ]
                 / a,
                 unique_id=unique_id,
-                position=[
-                    getattr(catalogue.positions, f"{c}cmbp")[unique_id] / a
-                    for c in "xyz"
-                ],
-                L=[
-                    getattr(catalogue.angular_momentum, f"l{c}_star")[unique_id]
-                    for c in "xyz"
-                ],
+                position=[centre[i] / a for i in range(3)],
+                L=[angular_mom[i] for i in range(3)],
             )
         )
 
