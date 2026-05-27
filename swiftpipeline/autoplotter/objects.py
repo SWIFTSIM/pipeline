@@ -11,6 +11,7 @@ import swiftpipeline.autoplotter.plot as plot
 from functools import reduce
 from unyt import unyt_quantity, unyt_array, matplotlib_support
 from unyt.exceptions import UnitConversionError
+import numpy as np
 from numpy import log10, linspace, logspace, array, logical_and, logical_not, ones
 import unyt.dimensions
 
@@ -41,6 +42,13 @@ valid_plot_types = [
 ]
 
 matplotlib_support.label_style = "[]"
+
+
+def _convert_units(arr, units):
+    if hasattr(arr, "convert_to_physical"):
+        arr.convert_to_physical(units)
+    else:
+        arr.convert_to_units(units)
 
 
 class AutoPlotterError(Exception):
@@ -670,9 +678,12 @@ class AutoPlot(object):
 
     def _make_plot_scatter(self, soap) -> Tuple[Figure, Axes]:
         x = self.get_quantity_from_soap_with_mask(self.x, soap)
-        x.convert_to_units(self.x_units)
+        _convert_units(x, self.x_units)
         y = self.get_quantity_from_soap_with_mask(self.y, soap)
-        y.convert_to_units(self.y_units)
+        _convert_units(y, self.y_units)
+        # TODO: Remove (only needed for agreement with old pipeline)
+        x = x.astype(np.float64)
+        y = y.astype(np.float64)
 
         fig, ax = subplots()
         plot.scatter_x_against_y(ax=ax, x=x, y=y)
@@ -682,9 +693,12 @@ class AutoPlot(object):
 
     def _make_plot_2dhistogram(self, soap) -> Tuple[Figure, Axes]:
         x = self.get_quantity_from_soap_with_mask(self.x, soap)
-        x.convert_to_units(self.x_units)
+        _convert_units(x, self.x_units)
         y = self.get_quantity_from_soap_with_mask(self.y, soap)
-        y.convert_to_units(self.y_units)
+        _convert_units(y, self.y_units)
+        # TODO: Remove (only needed for agreement with old pipeline)
+        x = x.astype(np.float64)
+        y = y.astype(np.float64)
 
         self.x_bins.convert_to_units(self.x_units)
         self.y_bins.convert_to_units(self.y_units)
@@ -703,7 +717,9 @@ class AutoPlot(object):
 
     def _make_plot_massfunction(self, soap) -> Tuple[Figure, Axes]:
         x = self.get_quantity_from_soap_with_mask(self.x, soap)
-        x.convert_to_units(self.x_units)
+        _convert_units(x, self.x_units)
+        # TODO: Remove (only needed for agreement with old pipeline)
+        x = x.astype(np.float64)
 
         mass_function_line = getattr(
             self,
@@ -731,7 +747,9 @@ class AutoPlot(object):
 
     def _make_plot_luminosityfunction(self, soap) -> Tuple[Figure, Axes]:
         x = self.get_quantity_from_soap_with_mask(self.x, soap)
-        x.convert_to_units(self.x_units)
+        _convert_units(x, self.x_units)
+        # TODO: Remove (only needed for agreement with old pipeline)
+        x = x.astype(np.float64)
 
         luminosity_function_line = getattr(
             self,
@@ -756,7 +774,9 @@ class AutoPlot(object):
 
     def _make_plot_histogram(self, soap) -> Tuple[Figure, Axes]:
         x = self.get_quantity_from_soap_with_mask(self.x, soap)
-        x.convert_to_units(self.x_units)
+        _convert_units(x, self.x_units)
+        # TODO: Remove (only needed for agreement with old pipeline)
+        x = x.astype(np.float64)
 
         self.x_bins.convert_to_units(self.x_units)
 
@@ -778,7 +798,9 @@ class AutoPlot(object):
         ), f"reverse_cumsum must be either true or false, not {self.reverse_cumsum}"
 
         x = self.get_quantity_from_soap_with_mask(self.x, soap)
-        x.convert_to_units(self.x_units)
+        _convert_units(x, self.x_units)
+        # TODO: Remove (only needed for agreement with old pipeline)
+        x = x.astype(np.float64)
 
         self.x_bins.convert_to_units(self.x_units)
 
