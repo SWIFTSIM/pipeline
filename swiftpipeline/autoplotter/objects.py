@@ -681,9 +681,6 @@ class AutoPlot(object):
         _convert_units(x, self.x_units)
         y = self.get_quantity_from_soap_with_mask(self.y, soap)
         _convert_units(y, self.y_units)
-        # TODO: Remove (only needed for agreement with old pipeline)
-        x = x.astype(np.float64)
-        y = y.astype(np.float64)
 
         fig, ax = subplots()
         plot.scatter_x_against_y(ax=ax, x=x, y=y)
@@ -696,9 +693,6 @@ class AutoPlot(object):
         _convert_units(x, self.x_units)
         y = self.get_quantity_from_soap_with_mask(self.y, soap)
         _convert_units(y, self.y_units)
-        # TODO: Remove (only needed for agreement with old pipeline)
-        x = x.astype(np.float64)
-        y = y.astype(np.float64)
 
         self.x_bins.convert_to_units(self.x_units)
         self.y_bins.convert_to_units(self.y_units)
@@ -718,8 +712,6 @@ class AutoPlot(object):
     def _make_plot_massfunction(self, soap) -> Tuple[Figure, Axes]:
         x = self.get_quantity_from_soap_with_mask(self.x, soap)
         _convert_units(x, self.x_units)
-        # TODO: Remove (only needed for agreement with old pipeline)
-        x = x.astype(np.float64)
 
         mass_function_line = getattr(
             self,
@@ -748,8 +740,6 @@ class AutoPlot(object):
     def _make_plot_luminosityfunction(self, soap) -> Tuple[Figure, Axes]:
         x = self.get_quantity_from_soap_with_mask(self.x, soap)
         _convert_units(x, self.x_units)
-        # TODO: Remove (only needed for agreement with old pipeline)
-        x = x.astype(np.float64)
 
         luminosity_function_line = getattr(
             self,
@@ -775,8 +765,6 @@ class AutoPlot(object):
     def _make_plot_histogram(self, soap) -> Tuple[Figure, Axes]:
         x = self.get_quantity_from_soap_with_mask(self.x, soap)
         _convert_units(x, self.x_units)
-        # TODO: Remove (only needed for agreement with old pipeline)
-        x = x.astype(np.float64)
 
         self.x_bins.convert_to_units(self.x_units)
 
@@ -799,8 +787,6 @@ class AutoPlot(object):
 
         x = self.get_quantity_from_soap_with_mask(self.x, soap)
         _convert_units(x, self.x_units)
-        # TODO: Remove (only needed for agreement with old pipeline)
-        x = x.astype(np.float64)
 
         self.x_bins.convert_to_units(self.x_units)
 
