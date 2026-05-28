@@ -176,9 +176,16 @@ def haloes_to_visualise(config: ImageConfig, catalogue_path: Path) -> List[Halo]
         angular_mom = catalogue.bound_subhalo.angular_momentum_stars[unique_id]
         haloes.append(
             Halo(
-                mass_200_crit=catalogue.spherical_overdensity_200_crit.total_mass[unique_id],
-                radius_200_crit=catalogue.spherical_overdensity_200_crit.soradius[unique_id] / a,
-                mass_100_kpc_star=catalogue.exclusive_sphere_100kpc.stellar_mass[unique_id],
+                mass_200_crit=catalogue.spherical_overdensity_200_crit.total_mass[
+                    unique_id
+                ],
+                radius_200_crit=catalogue.spherical_overdensity_200_crit.soradius[
+                    unique_id
+                ]
+                / a,
+                mass_100_kpc_star=catalogue.exclusive_sphere_100kpc.stellar_mass[
+                    unique_id
+                ],
                 radius_100_kpc_star=catalogue.exclusive_sphere_100kpc.half_mass_radius_stars[
                     unique_id
                 ]

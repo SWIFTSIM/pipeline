@@ -139,10 +139,7 @@ def decorate_axes(
     else:
         fontsize = None
 
-    label_switch = {
-        redshift_loc: f"$z={z:2.3f}$\n$a={a:2.3f}$",
-        comment_loc: comment,
-    }
+    label_switch = {redshift_loc: f"$z={z:2.3f}$\n$a={a:2.3f}$", comment_loc: comment}
 
     distance_from_edge = 0.025
 

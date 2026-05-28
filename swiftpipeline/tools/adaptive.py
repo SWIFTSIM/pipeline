@@ -208,7 +208,7 @@ def create_adaptive_bins(
     try:
         if logarithmic:
             bin_centers = unyt.unyt_array(
-                [10**x for x in bin_medians], units=values.units, name=values.name
+                [10 ** x for x in bin_medians], units=values.units, name=values.name
             )
 
             bin_edges = unyt.unyt_array(

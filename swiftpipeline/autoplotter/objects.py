@@ -18,7 +18,10 @@ import unyt.dimensions
 # Register mh (hydrogen atom mass) and mag (magnitude) as units
 try:
     from unyt import unit_registry as _ur
-    _ur.default_unit_registry.add("mh", float(unyt.mh.to("kg").value), unyt.dimensions.mass)
+
+    _ur.default_unit_registry.add(
+        "mh", float(unyt.mh.to("kg").value), unyt.dimensions.mass
+    )
     _ur.default_unit_registry.add("mag", 1.0, unyt.dimensions.dimensionless)
 except Exception:
     pass
@@ -662,8 +665,7 @@ class AutoPlot(object):
             )
         if self.select_centrals:
             self.structure_mask = logical_and(
-                self.structure_mask,
-                soap.input_halos.is_central.astype(bool),
+                self.structure_mask, soap.input_halos.is_central.astype(bool)
             )
         elif self.select_satellites:
             self.structure_mask = logical_and(
@@ -805,11 +807,7 @@ class AutoPlot(object):
         return fig, ax
 
     def make_plot(
-        self,
-        soap,
-        directory: str,
-        file_extension: str,
-        no_plot: bool = False,
+        self, soap, directory: str, file_extension: str, no_plot: bool = False
     ):
         """
         Federates out data parsing to individual functions based on the plot type.
@@ -950,9 +948,7 @@ class AutoPlotter(object):
         self.soap = catalogue
 
         if global_mask_tag is not None:
-            self.global_mask = reduce(
-                getattr, global_mask_tag.split("."), catalogue
-            )
+            self.global_mask = reduce(getattr, global_mask_tag.split("."), catalogue)
         else:
             self.global_mask = True
         return

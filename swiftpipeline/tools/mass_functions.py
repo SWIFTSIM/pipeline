@@ -183,7 +183,7 @@ def create_adaptive_mass_function(
     error = unyt.unyt_array(error, units=error_units)
 
     bin_centers = unyt.unyt_array(
-        [10**x for x in bin_medians], units=masses.units, name=masses.name
+        [10 ** x for x in bin_medians], units=masses.units, name=masses.name
     )
 
     if return_bin_edges:

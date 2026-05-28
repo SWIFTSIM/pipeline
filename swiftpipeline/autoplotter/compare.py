@@ -81,10 +81,7 @@ def recreate_instances(
 
 
 def recreate_single_figure(
-    plot: AutoPlot,
-    line_data: Dict[str, Dict],
-    output_directory: str,
-    file_type: str,
+    plot: AutoPlot, line_data: Dict[str, Dict], output_directory: str, file_type: str
 ) -> None:
     """
     Recreates a single figure using the data in ``line_data`` and the metadata in
