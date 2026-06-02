@@ -1,15 +1,13 @@
 SWIFT Pipeline
 ==============
 
-This repository stores the new SWIFT/EAGLE/COLIBRE pipeline. The old one is
-available at [this url](https://github.com/jborrow/xl-pipeline).
-
+This repository stores the SWIFT plotting pipeline.
 
 Rationale
 ---------
 
-We already have a pipeline; why do we need a new one? The current pipeline
-suffers from a number of problems.
+The [original](https://github.com/jborrow/xl-pipeline)
+suffered from a number of problems.
 
 1. Code fragmentation: everyone has their own version of the pipeline that
    they have made small changes to, and we have no idea which version is
@@ -29,12 +27,13 @@ really know what the scope should be. Now this has become more clear, we are
 ready to move to a more usable and stable code-base.
 
 
-Planned Improvements
---------------------
+Improvements
+------------
 
-To address the above problems, we will create a new 'pipeline' (that effectively
+This pipeline was created to address the above problems,
+which effectively
 borrows all of the code from the old one, just with new 'stitching'). This
-will aim to:
+aims to:
 
 1. Have separation of code and configuration. There will be one main program,
    `swift-pipeline`, that will take your configuration as arguments to produce
@@ -49,8 +48,8 @@ will aim to:
 An example set of configuration files is available in `example`.
 
 
-New Script API
---------------
+Script API
+----------
 
 Additional plotting scripts, such as the one used for the density-temperature
 figure, now should conform to the following API and be runnable as:
@@ -69,8 +68,8 @@ For an example of how to implement this, please see the example in
 `example/config/scripts`.
 
 
-New Pipeline API
-----------------
+Pipeline API
+------------
 
 The pipeline now can be run in two modes:
 
@@ -115,7 +114,7 @@ Installation
 To install the pipeline, you can use the python packaging manager, `pip`,
 
 ```bash
-pip3 install swiftpipeline
+pip install swiftpipeline
 ```
 
 This will make the `swift-pipeline` executable available.

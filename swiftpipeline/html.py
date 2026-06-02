@@ -7,8 +7,7 @@ from swiftpipeline.config import Config
 
 from swiftsimio import SWIFTDataset
 
-from velociraptor import __version__ as velociraptor_version
-from velociraptor.autoplotter.metadata import AutoPlotterMetadata
+from swiftpipeline.autoplotter.metadata import AutoPlotterMetadata
 
 from jinja2 import Environment, PackageLoader, FileSystemLoader, select_autoescape
 from time import strftime
@@ -114,7 +113,6 @@ class WebpageCreator(object):
         # this package and the velociraptor package used.
         self.variables = dict(
             pipeline_version=pipeline_version,
-            velociraptor_version=velociraptor_version,
             creation_date=strftime(r"%Y-%m-%d"),
             sections={},
             runs=[],
@@ -382,7 +380,6 @@ class ImageWebpageCreator(object):
         # this package and the velociraptor package used.
         self.variables = dict(
             pipeline_version=pipeline_version,
-            velociraptor_version=velociraptor_version,
             creation_date=strftime(r"%Y-%m-%d"),
             haloes=haloes,
             config=config,

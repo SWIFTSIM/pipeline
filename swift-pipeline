@@ -153,16 +153,15 @@ parser.add_argument(
 )
 
 if __name__ == "__main__":
-    # Parse our lovely arguments and pass them to the velociraptor library
-    from velociraptor.autoplotter.objects import AutoPlotter
-    from velociraptor.autoplotter.metadata import AutoPlotterMetadata
-    from velociraptor.autoplotter.compare import (
+    from swiftpipeline.autoplotter.objects import AutoPlotter
+    from swiftpipeline.autoplotter.metadata import AutoPlotterMetadata
+    from swiftpipeline.autoplotter.compare import (
         recreate_instances,
         recreate_single_figure,
     )
-    from velociraptor import load
+    from swiftpipeline.derived import register_derived_quantities
 
-    from swiftsimio import load as load_snapshot
+    from swiftsimio import load
 
     from matplotlib import __version__
     from matplotlib.pyplot import style
@@ -264,7 +263,7 @@ if __name__ == "__main__":
 
     print_if_debug("Loading snapshot metadata")
     snapshots = [
-        load_snapshot(f"{input}/{snapshot}")
+        load(f"{input}/{snapshot}")
         for input, snapshot in zip(args.input, args.snapshots)
     ]
     if args.run_names is not None:
@@ -325,11 +324,9 @@ if __name__ == "__main__":
         if global_mask_tag is not None:
             print_if_debug(f"Masking all catalogue properties using {global_mask_tag}")
 
-        catalogue = load(
-            halo_catalogue_filename,
-            disregard_units=True,
-            registration_file_path=registration_filename,
-        )
+        catalogue = load(halo_catalogue_filename)
+        if registration_filename:
+            register_derived_quantities(catalogue, registration_filename)
         if special_mode is not None:
             special_mode.adapt_catalogue(catalogue)
         print_if_debug(f"Linking catalogue and AutoPlotter instance.")
