@@ -806,6 +806,22 @@ class AutoPlot(object):
 
         return fig, ax
 
+    def get_fields(self) -> List[str]:
+        """
+        Returns a list of all fields that this plot requires.
+        """
+        fields = []
+        if self.x is not None:
+            fields.append(self.x)
+        if self.y is not None:
+            fields.append(self.y)
+        if self.selection_mask is not None:
+            fields.append(self.selection_mask)
+        if self.select_centrals or self.select_satellites:
+            fields.append("input_halos.is_central")
+
+        return list(set(fields))
+
     def make_plot(
         self, soap, directory: str, file_extension: str, no_plot: bool = False
     ):
@@ -888,6 +904,7 @@ class AutoPlotter(object):
     correction_directory: str
     created_successfully: List[bool]
     global_mask: Union[None, array]
+    global_mask_tag: Union[None, str]
 
     def __init__(
         self,
@@ -907,6 +924,7 @@ class AutoPlotter(object):
             correction_directory if correction_directory is not None else ""
         )
 
+        self.global_mask_tag = None
         self.load_yaml()
         self.parse_yaml()
 
@@ -946,6 +964,7 @@ class AutoPlotter(object):
         """
 
         self.soap = catalogue
+        self.global_mask_tag = global_mask_tag
 
         if global_mask_tag is not None:
             self.global_mask = reduce(getattr, global_mask_tag.split("."), catalogue)
@@ -967,7 +986,66 @@ class AutoPlotter(object):
 
         self.created_successfully = []
 
+        # 1. Dependency Analysis
+        plot_dependencies = []
+        field_ref_counts = {}
+
         for plot_instance in self.plots:
+            deps = plot_instance.get_fields()
+            if self.global_mask_tag is not None:
+                deps.append(self.global_mask_tag)
+            
+            plot_dependencies.append(set(deps))
+            for dep in deps:
+                field_ref_counts[dep] = field_ref_counts.get(dep, 0) + 1
+
+        # 2. Greedy Sorting (Least-New-Fields Heuristic)
+        remaining_plots = list(enumerate(self.plots))
+        ordered_plots_indices = []
+        active_fields = set()
+        
+        # We need a copy of ref counts to simulate the process during sorting
+        simulated_ref_counts = field_ref_counts.copy()
+
+        while remaining_plots:
+            best_idx = -1
+            best_score = (float("inf"), float("-inf"))  # (new_fields, completable_fields)
+            best_list_idx = -1
+
+            for list_idx, (orig_idx, plot_instance) in enumerate(remaining_plots):
+                deps = plot_dependencies[orig_idx]
+                new_fields = len(deps - active_fields)
+                
+                # How many fields will be "finished" if we run this plot?
+                completable_fields = 0
+                for dep in deps:
+                    if simulated_ref_counts[dep] == 1:
+                        completable_fields += 1
+                
+                score = (new_fields, -completable_fields) # Minimize new, maximize completable
+                
+                if score < best_score:
+                    best_score = score
+                    best_idx = orig_idx
+                    best_list_idx = list_idx
+
+            # Select the best plot
+            ordered_plots_indices.append(best_idx)
+            active_fields.update(plot_dependencies[best_idx])
+            
+            # Update simulated ref counts and active fields
+            for dep in plot_dependencies[best_idx]:
+                simulated_ref_counts[dep] -= 1
+                if simulated_ref_counts[dep] == 0:
+                    active_fields.remove(dep)
+            
+            remaining_plots.pop(best_list_idx)
+
+        # 3. Execution with Smart Unloading
+        for plot_idx in ordered_plots_indices:
+            plot_instance = self.plots[plot_idx]
+            deps = plot_dependencies[plot_idx]
+            
             try:
                 plot_instance.global_mask = self.global_mask
                 plot_instance.make_plot(
@@ -1016,5 +1094,25 @@ class AutoPlotter(object):
                     _, _, exc_traceback = sys.exc_info()
                     print("Traceback:", file=sys.stderr)
                     traceback.print_tb(exc_traceback, limit=10, file=sys.stderr)
+            
+            # Smart Unloading
+            for dep in deps:
+                field_ref_counts[dep] -= 1
+                if field_ref_counts[dep] == 0:
+                    # Unload field
+                    parts = dep.split(".")
+                    try:
+                        obj = self.soap
+                        for part in parts[:-1]:
+                            obj = getattr(obj, part)
+                        
+                        field_name = parts[-1]
+                        if hasattr(obj, field_name):
+                            delattr(obj, field_name)
+                    except AttributeError:
+                        pass
+            
+            # Clear internal masks in plot instance to free memory
+            plot_instance.structure_mask = None
 
         return
