@@ -27,7 +27,6 @@ setuptools.setup(
         "swiftsimio",
         "matplotlib",
         "jinja2",
-        "velociraptor",
         "unyt",
         "tqdm",
         "p_tqdm",
